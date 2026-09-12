@@ -652,7 +652,7 @@ function init() {
   sec5 += '참고: 이 초안은 사전 검토용 예시이며, 실제 제출 전 사람이 최종 확인해야 합니다.';
   sec5 += '</div>';
   sec5 += '<div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">위 초안은 입력된 정보를 바탕으로 자동 생성된 참고용이에요. 실제 보내기 전에 사람이 수정해야 해요.</div>';
-  sec5 += '<button class="copy-btn" style="margin-top: 8px;" onclick="copySection(5)">이 섹션 복사</button>';
+  sec5 += '<button id="copy-btn" class="copy-btn" style="margin-top: 8px;" onclick="copySection(5)">이 섹션 복사</button>';
   el('section-5-body').innerHTML = sec5;
   
   // UI 보이기
