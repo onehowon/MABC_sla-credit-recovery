@@ -32,7 +32,7 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 .input:focus, .edit-field:focus { outline: none; border-color: var(--color-surface-strong); box-shadow: 0 0 0 3px rgba(90, 82, 255, 0.12); }
 select { width: 100%; background: #fff; border: 1px solid var(--color-border-default); color: var(--color-text-primary); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size: var(--font-size-sm); font-family: inherit; cursor: pointer; }
 select:focus { outline: none; border-color: var(--color-surface-strong); box-shadow: 0 0 0 3px rgba(90, 82, 255, 0.12); }
-.input-row { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-end; }
+.input-row { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-end; margin-bottom: var(--space-3); }
 .input-row .input { flex: 1; min-width: 180px; }
 .preset-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-2); }
 .textarea { min-height: 100px; resize: vertical; }
@@ -42,7 +42,7 @@ select:focus { outline: none; border-color: var(--color-surface-strong); box-sha
 .row:last-child { border-bottom: none; }
 .row .k { color: var(--color-text-secondary); font-size: var(--font-size-sm); flex: 1; }
 .row .v { flex: 2; }
-.row .v input { width: 100%; background: #fff; border: 1px solid var(--color-border-default); color: var(--color-text-primary); padding: 4px 8px; border-radius: 4px; font-size: var(--font-size-sm); font-family: inherit; }
+.row .v .edit-field { width: 100%; }
 .notice { background: rgba(90, 82, 255, 0.04); border-left: 3px solid var(--color-surface-strong); padding: var(--space-3) var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-top: var(--space-4); }
 .cta { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-6); flex-wrap: wrap; }
 .btn-primary { background: var(--color-surface-strong); color: #fff; border: none; border-radius: var(--radius-md); padding: var(--space-3) var(--space-5); cursor: pointer; font-size: var(--font-size-sm); font-weight: 500; font-family: inherit; }
@@ -63,6 +63,8 @@ select:focus { outline: none; border-color: var(--color-surface-strong); box-sha
 .file-item .remove:hover { color: #c0392b; }
 .demo-warning { background: rgba(240, 185, 90, 0.08); border-left: 3px solid #f0b95a; padding: var(--space-3) var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--color-text-secondary); font-size: var(--font-size-xs); margin-top: var(--space-3); }
 .editable-note { font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: var(--space-2); font-style: italic; }
+.scope-warning { background: rgba(192, 57, 43, 0.06); border: 1px solid rgba(192, 57, 43, 0.15); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-5); color: #c0392b; font-size: var(--font-size-sm); }
+.scope-warning strong { display: block; margin-bottom: var(--space-1); }
 </style>
 </head>
 <body>
@@ -103,11 +105,11 @@ select:focus { outline: none; border-color: var(--color-surface-strong); box-sha
     <p class="hint">선택한 구간이 아래 입력란에 자동 채워져요. 필요하면 직접 수정할 수 있어요.</p>
 
     <div id="incident-list">
-      <div class="input-row" style="margin-bottom: var(--space-3);">
+      <div class="input-row">
         <input class="input" id="start0" type="text" placeholder="시작 예: 2025-07-10T08:00:00Z" value="2025-07-10T08:00:00Z">
         <input class="input" id="end0" type="text" placeholder="종료 예: 2025-07-10T08:35:00Z" value="2025-07-10T08:35:00Z">
       </div>
-      <div class="input-row" style="margin-bottom: var(--space-3);">
+      <div class="input-row">
         <input class="input" id="start1" type="text" placeholder="시작" value="2025-07-15T12:00:00Z">
         <input class="input" id="end1" type="text" placeholder="종료" value="2025-07-15T12:20:00Z">
       </div>
@@ -133,7 +135,16 @@ select:focus { outline: none; border-color: var(--color-surface-strong); box-sha
     </div>
     
     <div class="demo-warning">
-      ⚠️ 데모 모드에서는 선택한 파일이 실제로 업로드되거나 저장되지 않아요. 참고용으로만 표시됩니다.
+      ⚠️ 데모 모드에서는 선택한 파일이 실제로 업로드되거나 저장되지 않아요. 참고용으로 표시됩니다.
+    </div>
+
+    <div style="margin-top: var(--space-4); padding: var(--space-3); background: rgba(90, 82, 255, 0.04); border-radius: var(--radius-sm); border: 1px solid var(--color-surface-strong);">
+      <label class="label" style="margin: 0;">증거 상태 (직접 선택)</label>
+      <select id="evidence-status" style="margin-top: 4px;">
+        <option value="SUFFICIENT">SUFFICIENT — 증빙 충분 (MVP 최소 기준 충족, Google 최종 승인 아님)</option>
+        <option value="INSUFFICIENT">INSUFFICIENT — 증빙 부족 (청구 전 보완 필요)</option>
+        <option value="UNDETERMINED">UNDETERMINED — 확인 불가 (검토 필요)</option>
+      </select>
     </div>
   </div>
 
@@ -166,158 +177,219 @@ select:focus { outline: none; border-color: var(--color-surface-strong); box-sha
 </div>
 
 <script>
+'use strict';
+
 // ── 장애 구간 프리셋 ──
-document.getElementById('outage-preset').addEventListener('change', (e) => {
-  const val = e.target.value;
-  if (!val) return;
-  const incidents = val.split('|').map(pair => {
-    const [s, en] = pair.split(',');
-    return { start: s, end: en };
+(function() {
+  const presetSel = document.getElementById('outage-preset');
+  if (!presetSel) return;
+  presetSel.addEventListener('change', function(e) {
+    const val = e.target.value;
+    if (!val) return;
+    const incidents = val.split('|').map(function(pair) {
+      const parts = pair.split(',');
+      return { start: parts[0], end: parts[1] };
+    });
+    const container = document.getElementById('incident-list');
+    container.innerHTML = '';
+    incidents.forEach(function(inc, i) {
+      const div = document.createElement('div');
+      div.className = 'input-row';
+      div.innerHTML = `<input class="input" id="start${i}" type="text" placeholder="시작" value="${inc.start}"><input class="input" id="end${i}" type="text" placeholder="종료" value="${inc.end}">`;
+      container.appendChild(div);
+    });
+    const addBtn = document.getElementById('add-incident');
+    if (addBtn) addBtn.style.display = incidents.length >= 5 ? 'none' : '';
   });
-  const container = document.getElementById('incident-list');
-  container.innerHTML = '';
-  incidents.forEach((inc, i) => {
+})();
+
+// ── 장애 구간 추가 ──
+(function() {
+  const addBtn = document.getElementById('add-incident');
+  if (!addBtn) return;
+  addBtn.addEventListener('click', function() {
+    const container = document.getElementById('incident-list');
+    const i = container.children.length;
+    if (i >= 5) { alert('최대 5개까지 추가할 수 있어요.'); return; }
     const div = document.createElement('div');
     div.className = 'input-row';
-    div.style.marginBottom = '12px';
-    div.innerHTML = `<input class="input" id="start${i}" type="text" placeholder="시작" value="${inc.start}"><input class="input" id="end${i}" type="text" placeholder="종료" value="${inc.end}">`;
+    div.innerHTML = `<input class="input" id="start${i}" type="text" placeholder="시작"><input class="input" id="end${i}" type="text" placeholder="종료">`;
     container.appendChild(div);
   });
-  const addBtn = document.getElementById('add-incident');
-  if (addBtn) addBtn.style.display = incidents.length >= 5 ? 'none' : '';
-});
-
-document.getElementById('add-incident').addEventListener('click', () => {
-  const container = document.getElementById('incident-list');
-  const i = container.children.length;
-  if (i >= 5) { alert('최대 5개까지 추가할 수 있어요.'); return; }
-  const div = document.createElement('div');
-  div.className = 'input-row';
-  div.style.marginBottom = '12px';
-  div.innerHTML = `<input class="input" id="start${i}" type="text" placeholder="시작"><input class="input" id="end${i}" type="text" placeholder="종료">`;
-  container.appendChild(div);
-});
+})();
 
 // ── 증거 자료 헬퍼 ──
-document.getElementById('btn-sample-logs').addEventListener('click', () => {
-  const textarea = document.getElementById('logs');
-  textarea.value = textarea.value + '\n\n[Cloud Logging 샘플] 외부 연결 손실 감지:\n- 영향 인스턴스: 1234567890123456789\n- NIC: nic0\n- 시작: 2025-07-10T08:00:00Z\n- 복구: 2025-07-10T08:35:00Z\n- 로그 메시지: "External connectivity to instance 1234567890123456789 was lost"';
-  textarea.dispatchEvent(new Event('input'));
-});
-
-document.getElementById('btn-sample-link').addEventListener('click', () => {
-  const textarea = document.getElementById('logs');
-  textarea.value = textarea.value + '\n\nGoogle Incident 링크: https://status.cloud.google.com/incidents/20250710-external-connectivity-loss\n지원 케이스: support-case-12345';
-  textarea.dispatchEvent(new Event('input'));
-});
-
-document.getElementById('btn-clear-logs').addEventListener('click', () => {
-  if (confirm('로그 내용을 모두 지우시겠어요?')) {
-    document.getElementById('logs').value = '';
+(function() {
+  const logsEl = document.getElementById('logs');
+  if (!logsEl) return;
+  
+  const btnSampleLogs = document.getElementById('btn-sample-logs');
+  if (btnSampleLogs) {
+    btnSampleLogs.addEventListener('click', function() {
+      logsEl.value = logsEl.value + '\n\n[Cloud Logging 샘플] 외부 연결 손실 감지:\n- 영향 인스턴스: 1234567890123456789\n- NIC: nic0\n- 시작: 2025-07-10T08:00:00Z\n- 복구: 2025-07-10T08:35:00Z\n- 로그 메시지: "External connectivity to instance 1234567890123456789 was lost"';
+    });
   }
-});
+  
+  const btnSampleLink = document.getElementById('btn-sample-link');
+  if (btnSampleLink) {
+    btnSampleLink.addEventListener('click', function() {
+      logsEl.value = logsEl.value + '\n\nGoogle Incident 링크: https://status.cloud.google.com/incidents/20250710-external-connectivity-loss\n지원 케이스: support-case-12345';
+    });
+  }
+  
+  const btnClear = document.getElementById('btn-clear-logs');
+  if (btnClear) {
+    btnClear.addEventListener('click', function() {
+      if (confirm('로그 내용을 모두 지우시겠어요?')) {
+        logsEl.value = '';
+      }
+    });
+  }
+})();
 
 // ── 파일 첨부 (데모용) ──
-const fileInput = document.getElementById('evidence-files');
-const fileListEl = document.getElementById('file-list');
-const selectedFiles = [];
-
-fileInput.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files);
-  files.forEach(f => {
-    if (!selectedFiles.find(sf => sf.name === f.name && sf.size === f.size)) {
-      selectedFiles.push(f);
-    }
-  });
-  renderFileList();
-  fileInput.value = '';
-});
-
-function renderFileList() {
-  fileListEl.innerHTML = '';
-  if (selectedFiles.length === 0) {
-    fileListEl.innerHTML = '<span style="font-size: 12px; color: var(--color-text-secondary);">선택된 파일 없음</span>';
-    return;
-  }
-  selectedFiles.forEach((f, i) => {
-    const size = f.size >= 1024*1024 
-      ? (f.size / (1024*1024)).toFixed(1) + ' MB'
-      : (f.size / 1024).toFixed(1) + ' KB';
-    const div = document.createElement('span');
-    div.className = 'file-item';
-    div.innerHTML = `
-      <span>📎 ${f.name} (${size})</span>
-      <span class="remove" data-index="${i}">✕</span>
-    `;
-    div.querySelector('.remove').addEventListener('click', () => {
-      selectedFiles.splice(i, 1);
-      renderFileList();
+(function() {
+  const fileInput = document.getElementById('evidence-files');
+  const fileListEl = document.getElementById('file-list');
+  if (!fileInput || !fileListEl) return;
+  const selectedFiles = [];
+  
+  fileInput.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    files.forEach(function(f) {
+      if (!selectedFiles.find(function(sf) { return sf.name === f.name && sf.size === f.size; })) {
+        selectedFiles.push(f);
+      }
     });
-    fileListEl.appendChild(div);
+    renderFileList();
+    fileInput.value = '';
   });
-}
+  
+  function renderFileList() {
+    fileListEl.innerHTML = '';
+    if (selectedFiles.length === 0) {
+      fileListEl.innerHTML = '<span style="font-size:12px;color:var(--color-text-secondary);">선택된 파일 없음</span>';
+      return;
+    }
+    selectedFiles.forEach(function(f, i) {
+      const size = f.size >= 1024*1024 
+        ? (f.size / (1024*1024)).toFixed(1) + ' MB'
+        : (f.size / 1024).toFixed(1) + ' KB';
+      const div = document.createElement('span');
+      div.className = 'file-item';
+      div.innerHTML = `<span>📎 ${f.name} (${size})</span><span class="remove" data-index="${i}">✕</span>`;
+      div.querySelector('.remove').addEventListener('click', function() {
+        selectedFiles.splice(i, 1);
+        renderFileList();
+      });
+      fileListEl.appendChild(div);
+    });
+  }
+})();
 
-// ── 분석하기 (다음 페이지로 이동) — 셀렉터 버그 수정 ──
-document.getElementById('analyze-btn').addEventListener('click', () => {
-  console.log('[SLA] 분석 시작');
+// ── 분석하기 (다음 페이지로 이동) ──
+(function() {
+  const btn = document.getElementById('analyze-btn');
+  if (!btn) return;
   
-  const year = document.getElementById('year').value.trim();
-  const month = document.getElementById('month').value.trim();
-  
-  // 장애 구간 읽기 — input#start 대신 input-row의 input들 읽기
-  const incidents = [];
-  document.querySelectorAll('#incident-list .input-row').forEach(row => {
-    const inputs = row.querySelectorAll('input.input');
-    if (inputs.length >= 2) {
-      const s = inputs[0].value.trim();
-      const e = inputs[1].value.trim();
-      if (s && e) incidents.push({ start: s, end: e });
+  btn.addEventListener('click', function() {
+    console.log('[SLA] 분석 시작');
+    
+    // 1. 월 정보
+    const yearEl = document.getElementById('year');
+    const monthEl = document.getElementById('month');
+    const year = yearEl ? yearEl.value.trim() : '';
+    const month = monthEl ? monthEl.value.trim() : '';
+    
+    console.log('[SLA] year="' + year + '" month="' + month + '"');
+    
+    if (!year || !month) {
+      alert('연도와 월을 입력해주세요.');
+      return;
+    }
+    const yearNum = parseInt(year, 10);
+    const monthNum = parseInt(month, 10);
+    if (isNaN(yearNum) || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+      alert('올바른 연도(숫자)와 월(1~12)을 입력해주세요.');
+      return;
+    }
+    
+    // 2. 장애 구간 읽기 — input-row의 input.input 요소들
+    const incidentList = document.getElementById('incident-list');
+    const incidents = [];
+    if (incidentList) {
+      const rows = incidentList.querySelectorAll('.input-row');
+      rows.forEach(function(row) {
+        const inputs = row.querySelectorAll('input.input');
+        if (inputs.length >= 2) {
+          const s = inputs[0].value.trim();
+          const e = inputs[1].value.trim();
+          if (s && e) {
+            incidents.push({ start: s, end: e });
+          }
+        }
+      });
+    }
+    
+    console.log('[SLA] incidents=' + incidents.length);
+    
+    if (incidents.length === 0) {
+      alert('장애 구간을 하나 이상 입력해주세요.\n\n💡 팁: 상단 드롭다운에서 자주 쓰는 장애 구간을 선택하면 자동 입력돼요.');
+      return;
+    }
+    
+    // 3. 로그
+    const logs = (document.getElementById('logs') || {}).value || '';
+    
+    // 4. 증거 상태
+    const evidenceStatusEl = document.getElementById('evidence-status');
+    const evidenceStatus = evidenceStatusEl ? evidenceStatusEl.value : 'SUFFICIENT';
+    
+    // 5. 리소스 정보 (편집된 값)
+    function getField(id, fallback) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : fallback;
+    }
+    const extract = {
+      project_id: getField('field-project_id', 'my-sla-recovery-project'),
+      instance_id: getField('field-instance_id', '1234567890123456789'),
+      nic: getField('field-nic', 'nic0'),
+      network_tier: getField('field-network_tier', 'Premium'),
+      series: getField('field-series', 'E2'),
+      provisioning: getField('field-provisioning', 'standard'),
+      region: getField('field-region', 'us-central1'),
+      outage_type: getField('field-outage_type', 'external connectivity loss'),
+    };
+    
+    console.log('[SLA] extract:', extract);
+    console.log('[SLA] evidence_status:', evidenceStatus);
+    
+    // 6. 세션 저장 후 이동
+    const payload = {
+      year: yearNum,
+      month: monthNum,
+      incidents: incidents,
+      logs: logs,
+      files: [],
+      extract: extract,
+      evidence_status: evidenceStatus,
+      billing_verified: false,
+      deadline_blocker: false,
+      case_id: 'support-case-12345',
+      google_incident_link: 'https://status.cloud.google.com/incidents/sample',
+      outage_logs: logs,
+    };
+    
+    try {
+      sessionStorage.setItem('sla_input', JSON.stringify(payload));
+      console.log('[SLA] sessionStorage 저장 완료, screen_b.html로 이동');
+      window.location.href = 'screen_b.html';
+    } catch (e) {
+      console.error('[SLA] sessionStorage 오류:', e);
+      alert('저장 중 오류가 발생했어요. 다시 시도해주세요.');
     }
   });
-  
-  const logs = document.getElementById('logs').value;
-  
-  // 리소스 정보 읽기 (편집된 값)
-  const extract = {
-    project_id: document.getElementById('field-project_id').value.trim(),
-    instance_id: document.getElementById('field-instance_id').value.trim(),
-    nic: document.getElementById('field-nic').value.trim(),
-    network_tier: document.getElementById('field-network_tier').value.trim(),
-    series: document.getElementById('field-series').value.trim(),
-    provisioning: document.getElementById('field-provisioning').value.trim(),
-    region: document.getElementById('field-region').value.trim(),
-    outage_type: document.getElementById('field-outage_type').value.trim(),
-  };
-  
-  console.log('[SLA] year=' + year + ' month=' + month + ' incidents=' + incidents.length);
-  
-  if (!year || !month) {
-    alert('연도와 월을 입력해주세요.');
-    return;
-  }
-  if (incidents.length === 0) {
-    alert('장애 구간을 하나 이상 입력해주세요.\n\n💡 팁: 상단 드롭다운에서 자주 쓰는 장애 구간을 선택하면 자동 입력돼요.');
-    return;
-  }
-  
-  const payload = {
-    year: parseInt(year),
-    month: parseInt(month),
-    incidents: incidents,
-    logs: logs,
-    files: selectedFiles.map(f => ({ name: f.name, size: f.size })),
-    extract: extract,
-    evidence_status: 'SUFFICIENT',
-    billing_verified: false,
-    deadline_blocker: false,
-    case_id: 'support-case-12345',
-    google_incident_link: 'https://status.cloud.google.com/incidents/sample',
-  };
-  
-  console.log('[SLA] 세션 저장 후 screen_b.html로 이동');
-  sessionStorage.setItem('sla_input', JSON.stringify(payload));
-  window.location.href = 'screen_b.html';
-});
+})();
 </script>
 </body>
 </html>
