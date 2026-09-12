@@ -89,20 +89,20 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     <span id="scope-msg"></span>
   </div>
 
-  <div class="hero">
+  <div class="hero" id="hero">
     <p class="month-label" id="hero-month">분석 대상: —</p>
     <h1 id="hero-title">분석 결과</h1>
     <div class="conclusion" id="hero-conclusion">
       <div class="icon" id="hero-icon">?</div>
       <div class="text">
         <div class="label">결론</div>
-        <div class="value" id="hero-value">계산 중…</div>
-        <div class="sub" id="hero-sub">입력값을 바탕으로 계산됩니다.</div>
+        <div class="value" id="hero-value">로딩 중…</div>
+        <div class="sub" id="hero-sub">잠시만 기다려주세요.</div>
       </div>
     </div>
   </div>
 
-  <div class="cards">
+  <div class="cards" id="cards-area" style="display:none;">
     <div class="card">
       <h3>📋 증빙 상태</h3>
       <div class="status-row"><span class="k">증거 평가</span><span class="v"><span class="badge" id="badge-evidence">—</span></span></div>
@@ -123,9 +123,9 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     </div>
   </div>
 
-  <div class="calc-section">
+  <div class="calc-section" id="calc-section" style="display:none;">
     <h3>📐 계산 근거</h3>
-    <table class="calc-table" id="calc-table">
+    <table class="calc-table">
       <tr><td>입력된 장애 구간 (union 후)</td><td id="calc-incidents">—</td></tr>
       <tr><td>월 총 분</td><td id="calc-total-min">—</td></tr>
       <tr><td>전체 장애 (분, union 후)</td><td id="calc-gross">—</td></tr>
@@ -138,47 +138,55 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     </table>
   </div>
 
-  <div style="font-size: var(--font-size-md); font-weight: 600; margin: var(--space-5) 0 var(--space-3); color: var(--color-text-primary);">📦 Claim Pack — 제출 준비 자료 (Frozen 5종)</div>
-  <div class="claim-pack" style="margin-bottom: var(--space-6);">
-    <div class="claim-section">
-      <div class="claim-section-header" onclick="toggleSection(this)">
-        <h3>1. 장애 요약 <span class="toggle-icon">▼</span></h3>
+  <div id="claim-pack-area" style="display:none;">
+    <div style="font-size: var(--font-size-md); font-weight: 600; margin: var(--space-5) 0 var(--space-3); color: var(--color-text-primary);">📦 Claim Pack — 제출 준비 자료 (Frozen 5종)</div>
+    <div class="claim-pack" style="margin-bottom: var(--space-6);">
+      <div class="claim-section">
+        <div class="claim-section-header" onclick="toggleSection(this)">
+          <h3>1. 장애 요약 <span class="toggle-icon">▼</span></h3>
+        </div>
+        <div class="claim-section-body" id="section-1-body"></div>
       </div>
-      <div class="claim-section-body" id="section-1-body"></div>
-    </div>
-    <div class="claim-section">
-      <div class="claim-section-header" onclick="toggleSection(this)">
-        <h3>2. SLA 계산 근거 <span class="toggle-icon">▼</span></h3>
+      <div class="claim-section">
+        <div class="claim-section-header" onclick="toggleSection(this)">
+          <h3>2. SLA 계산 근거 <span class="toggle-icon">▼</span></h3>
+        </div>
+        <div class="claim-section-body" id="section-2-body"></div>
       </div>
-      <div class="claim-section-body" id="section-2-body"></div>
-    </div>
-    <div class="claim-section">
-      <div class="claim-section-header" onclick="toggleSection(this)">
-        <h3>3. 증빙 체크리스트 <span class="toggle-icon">▼</span></h3>
+      <div class="claim-section">
+        <div class="claim-section-header" onclick="toggleSection(this)">
+          <h3>3. 증빙 체크리스트 <span class="toggle-icon">▼</span></h3>
+        </div>
+        <div class="claim-section-body" id="section-3-body"></div>
       </div>
-      <div class="claim-section-body" id="section-3-body"></div>
-    </div>
-    <div class="claim-section">
-      <div class="claim-section-header" onclick="toggleSection(this)">
-        <h3>4. 확인 필요 항목 <span class="toggle-icon">▼</span></h3>
+      <div class="claim-section">
+        <div class="claim-section-header" onclick="toggleSection(this)">
+          <h3>4. 확인 필요 항목 <span class="toggle-icon">▼</span></h3>
+        </div>
+        <div class="claim-section-body" id="section-4-body"></div>
       </div>
-      <div class="claim-section-body" id="section-4-body"></div>
-    </div>
-    <div class="claim-section">
-      <div class="claim-section-header" onclick="toggleSection(this)">
-        <h3>5. 제출 정보 + Support 문의 초안 <span class="toggle-icon">▼</span></h3>
+      <div class="claim-section">
+        <div class="claim-section-header" onclick="toggleSection(this)">
+          <h3>5. 제출 정보 + Support 문의 초안 <span class="toggle-icon">▼</span></h3>
+        </div>
+        <div class="claim-section-body" id="section-5-body"></div>
       </div>
-      <div class="claim-section-body" id="section-5-body"></div>
     </div>
   </div>
 
-  <div class="frozen-note">
+  <div class="frozen-note" id="frozen-note" style="display:none;">
     <strong>Frozen 정책 기준:</strong> 이 화면의 모든 수치는 브라우저에서 RFC3339 파싱 → 월 clip/split → union → 1분 미만 미집계 → verified exclusion 차감 → raw MUP 산출 → tier 판정 순서로 계산됩니다. (calculator.py와 동일 로직, pre-check 등급 기준)
   </div>
 
-  <div class="cta">
+  <div class="cta" id="cta-area" style="display:none;">
     <button class="btn" id="btn-reanalyze">분석 다시 하기</button>
     <button class="btn btn-ghost" id="btn-back-input">입력 화면으로</button>
+  </div>
+
+  <div id="error-area" style="display:none; margin-top: var(--space-5); padding: var(--space-4); background: rgba(192, 57, 43, 0.08); border: 1px solid rgba(192, 57, 43, 0.2); border-radius: var(--radius-md); color: #c0392b; font-size: var(--font-size-sm);">
+    <strong>⚠️ 오류</strong>
+    <div id="error-msg"></div>
+    <button class="btn btn-ghost" id="btn-back-error" style="margin-top: var(--space-3);">입력 화면으로 돌아가기</button>
   </div>
 </div>
 
@@ -187,69 +195,58 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 
 // ── RFC3339 파서 (UTC 기준, Date.UTC 활용) ──
 function parseDateToUTC(dateStr) {
-  // RFC3339: 2025-07-10T08:00:00Z 또는 2025-07-10T08:00:00+09:00 등
-  const s = String(dateStr).trim();
+  var s = String(dateStr).trim();
+  if (!s) return null;
   
   // Z 제거 (UTC 표시)
-  let working = s;
-  let offsetMinutes = 0;
+  var working = s;
+  var offsetMinutes = 0;
   
   if (working.endsWith('Z') || working.endsWith('z')) {
     working = working.slice(0, -1);
-    // Z는 UTC이므로 offset 0
-  } else if (working.includes('T')) {
-    const tIdx = working.indexOf('T');
-    const datePart = working.substring(0, tIdx);
-    const timePart = working.substring(tIdx + 1);
+  } else if (working.indexOf('T') >= 0) {
+    var tIdx = working.indexOf('T');
+    var datePart = working.substring(0, tIdx);
+    var timePart = working.substring(tIdx + 1);
     
-    if (timePart.includes('+')) {
-      const plusIdx = timePart.indexOf('+');
-      const tPart = timePart.substring(0, plusIdx);
-      const offPart = timePart.substring(plusIdx + 1);
+    if (timePart.indexOf('+') >= 0) {
+      var plusIdx = timePart.indexOf('+');
+      var tPart = timePart.substring(0, plusIdx);
+      var offPart = timePart.substring(plusIdx + 1);
       working = datePart + 'T' + tPart;
       offsetMinutes = parseOffset(offPart);
-    } else if (timePart.includes('-') && (timePart.match(/-/g) || []).length > 1) {
-      const lastDash = timePart.lastIndexOf('-');
-      const tPart = timePart.substring(0, lastDash);
-      const offPart = timePart.substring(lastDash + 1);
+    } else if (timePart.indexOf('-') >= 0 && (timePart.match(/-/g) || []).length > 1) {
+      var lastDash = timePart.lastIndexOf('-');
+      var tPart = timePart.substring(0, lastDash);
+      var offPart = timePart.substring(lastDash + 1);
       working = datePart + 'T' + tPart;
       offsetMinutes = parseOffset('-' + offPart);
     }
   }
   
-  // Date.UTC로 파싱 (로컬 타임존 영향 없음)
-  // format: YYYY-MM-DDTHH:mm:ss
-  const m = working.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
-  if (!m) {
-    // fallback: Date.parse 시도 (UTC로 가정)
-    const d = new Date(working);
-    if (isNaN(d.getTime())) return null;
-    return { year: d.getUTCFullYear(), month: d.getUTCMonth(), day: d.getUTCDate(),
-             hour: d.getUTCHours(), min: d.getUTCMinutes(), sec: d.getUTCSeconds(),
-             offsetMinutes: 0 };
-  }
+  var m = working.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
   
-  const year = parseInt(m[1], 10);
-  const month = parseInt(m[2], 10) - 1;
-  const day = parseInt(m[3], 10);
-  const hour = parseInt(m[4], 10);
-  const min = parseInt(m[5], 10);
-  const sec = m[6] ? parseInt(m[6], 10) : 0;
+  var year = parseInt(m[1], 10);
+  var month = parseInt(m[2], 10) - 1;
+  var day = parseInt(m[3], 10);
+  var hour = parseInt(m[4], 10);
+  var min = parseInt(m[5], 10);
+  var sec = m[6] ? parseInt(m[6], 10) : 0;
   
-  return { year, month, day, hour, min, sec, offsetMinutes };
+  return { year: year, month: month, day: day, hour: hour, min: min, sec: sec, offsetMinutes: offsetMinutes };
 }
 
 function parseOffset(s) {
   s = s.replace(':', '');
-  let sign = 1;
-  if (s.startsWith('-')) { sign = -1; s = s.slice(1); }
-  else if (s.startsWith('+')) s = s.slice(1);
-  if (s.length === 4) return sign * (parseInt(s.slice(0,2), 10) * 60 + parseInt(s.slice(2), 10));
+  var sign = 1;
+  if (s.indexOf('-') === 0) { sign = -1; s = s.substring(1); }
+  else if (s.indexOf('+') === 0) s = s.substring(1);
+  if (s.length === 4) return sign * (parseInt(s.substring(0,2), 10) * 60 + parseInt(s.substring(2), 10));
   if (s.length === 2) return sign * parseInt(s, 10) * 60;
   return 0;
 }
 
-// parseDateToUTC 결과를 밀리초 타임스탬프로 변환
 function dateToUTCms(d) {
   if (!d) return null;
   return Date.UTC(d.year, d.month, d.day, d.hour, d.min, d.sec || 0) + d.offsetMinutes * 60000;
@@ -257,28 +254,27 @@ function dateToUTCms(d) {
 
 // ── 월 계산 ──
 function monthBounds(year, month) {
-  // month: 1-12
-  const start = Date.UTC(year, month - 1, 1, 0, 0, 0);
-  const lastDay = new Date(Date.UTC(year, month, 0, 0, 0, 0)).getUTCDate();
-  const end = Date.UTC(year, month - 1, lastDay, 0, 0, 0);
-  return { start, end, totalMinutes: lastDay * 24 * 60 };
+  var start = Date.UTC(year, month - 1, 1, 0, 0, 0);
+  var lastDay = new Date(Date.UTC(year, month, 0, 0, 0, 0)).getUTCDate();
+  var end = Date.UTC(year, month - 1, lastDay, 0, 0, 0);
+  return { start: start, end: end, totalMinutes: lastDay * 24 * 60 };
 }
 
 function clip(s, e, ms, me) {
   if (e <= ms || s >= me) return null;
-  const a = s > ms ? s : ms;
-  const b = e < me ? e : me;
+  var a = s > ms ? s : ms;
+  var b = e < me ? e : me;
   if (b <= a) return null;
   return { start: a, end: b };
 }
 
 function unionIntervals(intervals) {
-  if (!intervals.length) return [];
-  const sorted = intervals.map(function(i) { return [i.start, i.end]; })
+  if (!intervals || intervals.length === 0) return [];
+  var sorted = intervals.map(function(i) { return [i.start, i.end]; })
     .sort(function(a, b) { return a[0] - b[0]; });
-  const merged = [[sorted[0][0], sorted[0][1]]];
-  for (let i = 1; i < sorted.length; i++) {
-    const last = merged[merged.length - 1];
+  var merged = [[sorted[0][0], sorted[0][1]]];
+  for (var i = 1; i < sorted.length; i++) {
+    var last = merged[merged.length - 1];
     if (sorted[i][0] <= last[1]) {
       if (sorted[i][1] > last[1]) last[1] = sorted[i][1];
     } else {
@@ -289,13 +285,14 @@ function unionIntervals(intervals) {
 }
 
 function minutesWithFloorRule(intervals, floorRule) {
-  let total = 0;
-  for (const interval of intervals) {
-    let fs, fe;
+  if (!intervals) return 0;
+  var total = 0;
+  for (var j = 0; j < intervals.length; j++) {
+    var interval = intervals[j];
+    var fs, fe;
     if (floorRule) {
-      // 1분 미만 미집계: 시작 올림, 종료 내림
-      const sDate = new Date(interval.start);
-      const eDate = new Date(interval.end);
+      var sDate = new Date(interval.start);
+      var eDate = new Date(interval.end);
       fs = new Date(Date.UTC(sDate.getUTCFullYear(), sDate.getUTCMonth(), sDate.getUTCDate(),
                               sDate.getUTCHours(), sDate.getUTCMinutes(), 0, 0));
       if (fs.getTime() < interval.start) fs = new Date(fs.getTime() + 60000);
@@ -326,7 +323,6 @@ function calcReadiness(sloBreached, evidenceStatus, billingVerified, deadlineBlo
   if (sloBreached === false) {
     return { status: 'NOT_APPLICABLE', label: '해당 없음', reason: 'SLO 위반 없음 (99.90% 이상)' };
   }
-  // breached = true
   if (evidenceStatus === 'INSUFFICIENT' || evidenceStatus === 'UNDETERMINED') {
     return { status: 'NEEDS_REVIEW', label: '추가 확인 필요', reason: '증거 부족으로 청구 검토 준비 미완료' };
   }
@@ -336,19 +332,21 @@ function calcReadiness(sloBreached, evidenceStatus, billingVerified, deadlineBlo
   return { status: 'READY_FOR_HUMAN_CLAIM_REVIEW', label: '청구 검토 준비 완료', reason: '청구 검토 준비 완료' };
 }
 
-// ── sessionStorage에서 데이터 읽기 ──
+// ── 세션에서 데이터 읽기 ──
 function getStoredInput() {
   try {
-    const raw = sessionStorage.getItem('sla_input');
+    var raw = sessionStorage.getItem('sla_input');
     if (raw) {
-      const data = JSON.parse(raw);
-      return data;
+      var data = JSON.parse(raw);
+      if (data && data.year && data.month && data.incidents) {
+        return data;
+      }
     }
   } catch (e) {
-    console.warn('[SLA] sessionStorage 파싱 오류:', e);
+    console.warn('[SLA B] sessionStorage 파싱 오류:', e);
   }
   
-  // 세션 없으면 기본값 (데모용)
+  // 세션 없으면 기본값 (데모용 - Scenario A)
   return {
     year: 2025, month: 7,
     incidents: [
@@ -376,105 +374,122 @@ function getStoredInput() {
 
 // ── 계산 통합 함수 ──
 function computeFromInput(input) {
-  const year = input.year;
-  const month = input.month;
-  const bounds = monthBounds(year, month);
+  if (!input || !input.incidents) {
+    return { error: '입력 데이터가 없습니다.' };
+  }
   
-  // 장애 구간 파싱 + clip + union
-  const parsed = input.incidents.map(function(it) {
-    const s = parseDateToUTC(it.start);
-    const e = parseDateToUTC(it.end);
-    if (!s || !e) return null;
-    const sMs = dateToUTCms(s);
-    const eMs = dateToUTCms(e);
-    if (sMs === null || eMs === null) return null;
-    return clip(sMs, eMs, bounds.start, bounds.end);
-  }).filter(Boolean);
+  var year = input.year;
+  var month = input.month;
+  var bounds = monthBounds(year, month);
   
-  const unionInc = unionIntervals(parsed);
-  const gross = minutesWithFloorRule(unionInc, true);
+  var parsed = [];
+  for (var k = 0; k < input.incidents.length; k++) {
+    var it = input.incidents[k];
+    var s = parseDateToUTC(it.start);
+    var e = parseDateToUTC(it.end);
+    if (!s || !e) continue;
+    var sMs = dateToUTCms(s);
+    var eMs = dateToUTCms(e);
+    if (sMs === null || eMs === null) continue;
+    var c = clip(sMs, eMs, bounds.start, bounds.end);
+    if (c) parsed.push(c);
+  }
   
-  // exclusion (현재 입력 없음)
-  const excluded = 0;
-  const eligible = Math.max(gross - excluded, 0);
-  
-  const totalMin = bounds.totalMinutes;
-  const rawMup = totalMin > 0 ? (totalMin - eligible) / totalMin * 100 : null;
-  const displayMup = rawMup !== null ? Math.round(rawMup * 100) / 100 : null;
-  
-  const breached = rawMup !== null && rawMup < 99.9;
-  const tier = calcTier(rawMup);
-  const readiness = calcReadiness(breached, input.evidence_status, input.billing_verified, input.deadline_blocker);
-  
-  // incident count before/after union
-  const beforeUnion = input.incidents.length;
-  const afterUnion = unionInc.length;
+  var unionInc = unionIntervals(parsed);
+  var gross = minutesWithFloorRule(unionInc, true);
+  var excluded = 0;
+  var eligible = Math.max(gross - excluded, 0);
+  var totalMin = bounds.totalMinutes;
+  var rawMup = totalMin > 0 ? (totalMin - eligible) / totalMin * 100 : null;
+  var displayMup = rawMup !== null ? Math.round(rawMup * 100) / 100 : null;
+  var breached = rawMup !== null && rawMup < 99.9;
+  var tier = calcTier(rawMup);
+  var readiness = calcReadiness(breached, input.evidence_status || 'SUFFICIENT', input.billing_verified || false, input.deadline_blocker || false);
   
   return {
-    monthLabel: `${year}-${String(month).padStart(2, '0')}`,
+    monthLabel: year + '-' + (month < 10 ? '0' + month : '' + month),
     totalMinutes: totalMin,
     grossOutage: gross,
     excluded: excluded,
     eligible: eligible,
-    beforeUnion: beforeUnion,
-    afterUnion: afterUnion,
+    beforeUnion: input.incidents.length,
+    afterUnion: unionInc.length,
     rawMup: rawMup,
     displayMup: displayMup,
     breached: breached,
     tier: tier,
     readiness: readiness,
     incidents: unionInc,
-    scopeIssue: null,
+    error: null,
   };
 }
 
 // ── 이스케이프 ──
 function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ── 타임스탬프 → RFC3339 문자열 (Z 포함) ──
+// ── 타임스탬프 → RFC3339 ──
 function msToRFC3339(ms) {
-  const d = new Date(ms);
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  const hh = String(d.getUTCHours()).padStart(2, '0');
-  const mi = String(d.getUTCMinutes()).padStart(2, '0');
-  const ss = String(d.getUTCSeconds()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}Z`;
+  var d = new Date(ms);
+  var yyyy = d.getUTCFullYear();
+  var mm = ('0' + (d.getUTCMonth() + 1)).slice(-2);
+  var dd = ('0' + d.getUTCDate()).slice(-2);
+  var hh = ('0' + d.getUTCHours()).slice(-2);
+  var mi = ('0' + d.getUTCMinutes()).slice(-2);
+  var ss = ('0' + d.getUTCSeconds()).slice(-2);
+  return yyyy + '-' + mm + '-' + dd + 'T' + hh + ':' + mi + ':' + ss + 'Z';
 }
 
-// ── 화면 렌더링 ──
-function render(input, r) {
-  const ext = input.extract;
+// ── DOM 요소 헬퍼 ──
+function el(id) {
+  return document.getElementById(id);
+}
+
+// ── 토글 ──
+function toggleSection(header) {
+  var body = header.nextElementSibling;
+  header.classList.toggle('open');
+  if (body) body.classList.toggle('open');
+}
+
+// ── 초기화 & 렌더링 ──
+function init() {
+  var input = getStoredInput();
+  console.log('[SLA B] 입력 데이터:', input);
   
-  // ── Hero ──
-  document.getElementById('hero-month').textContent = `분석 대상: ${r.monthLabel} · ${esc(ext.project_id)} 프로젝트`;
-  const icon = document.getElementById('hero-icon');
-  const valueEl = document.getElementById('hero-value');
-  const subEl = document.getElementById('hero-sub');
+  var r = computeFromInput(input);
+  console.log('[SLA B] 계산 결과:', r);
   
-  if (r.scopeIssue) {
-    icon.style.background = '#b8860b';
-    icon.textContent = '!';
-    valueEl.textContent = r.scopeIssue;
-    valueEl.style.color = '#b8860b';
-    subEl.textContent = '범위 확인이 필요해요. 입력값을 검토해주세요.';
-  } else if (r.breached === false) {
+  if (r.error) {
+    el('error-area').style.display = 'block';
+    el('error-msg').textContent = r.error + '\n\n입력 화면으로 돌아가서 다시 시도해주세요.';
+    return;
+  }
+  
+  var ext = input.extract || {};
+  
+  // Hero
+  el('hero-month').textContent = '분석 대상: ' + r.monthLabel + ' · ' + esc(ext.project_id) + ' 프로젝트';
+  
+  var icon = el('hero-icon');
+  var valueEl = el('hero-value');
+  var subEl = el('hero-sub');
+  
+  if (r.breached === false) {
     icon.style.background = '#2d7d5a';
     icon.textContent = '✓';
     valueEl.textContent = 'SLA 위반 없음';
     valueEl.style.color = '#2d7d5a';
-    subEl.textContent = `월 가동률 ${r.displayMup}% (실제 ${r.rawMup}%) · 크레딧 미해당 (99.90% 이상)`;
+    subEl.textContent = '월 가동률 ' + (r.displayMup !== null ? r.displayMup + '%' : '—') + ' (실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '%) · 크레딧 미해당 (99.90% 이상)';
   } else if (r.breached === true) {
     icon.style.background = '#c0392b';
     icon.textContent = '!';
     valueEl.textContent = 'SLA 위반 발생';
     valueEl.style.color = '#c0392b';
-    subEl.textContent = r.tier
-      ? `월 가동률 ${r.displayMup}% (실제 ${r.rawMup}%) · ${r.tier.percent}% 크레딧 (${r.tier.range})`
-      : `월 가동률 ${r.displayMup}% (실제 ${r.rawMup}%) · 크레딧 등급 없음`;
+    var tierStr = r.tier ? r.tier.percent + '% 크레딧 (' + r.tier.range + ')' : '크레딧 등급 없음';
+    subEl.textContent = '월 가동률 ' + (r.displayMup !== null ? r.displayMup + '%' : '—') + ' (실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '%) · ' + tierStr;
   } else {
     icon.style.background = '#b8860b';
     icon.textContent = '?';
@@ -483,18 +498,19 @@ function render(input, r) {
     subEl.textContent = '월 총 분 계산 불가 또는 장애 정보 부족';
   }
   
-  // ── 증빙 상태 카드 ──
-  const evBadge = document.getElementById('badge-evidence');
-  const rdBadge = document.getElementById('badge-readiness');
-  const amBadge = document.getElementById('badge-amount');
+  // 증빙 카드
+  var evBadge = el('badge-evidence');
+  var rdBadge = el('badge-readiness');
+  var amBadge = el('badge-amount');
   
-  const evColorMap = { SUFFICIENT: '#2d7d5a', INSUFFICIENT: '#c0392b', UNDETERMINED: '#b8860b' };
-  const evLabelMap = { SUFFICIENT: '충분', INSUFFICIENT: '부족', UNDETERMINED: '확인 필요' };
-  const evColor = evColorMap[input.evidence_status] || '#65758b';
-  const evLabel = evLabelMap[input.evidence_status] || input.evidence_status;
+  var evStatus = input.evidence_status || 'SUFFICIENT';
+  var evColorMap = { SUFFICIENT: '#2d7d5a', INSUFFICIENT: '#c0392b', UNDETERMINED: '#b8860b' };
+  var evLabelMap = { SUFFICIENT: '충분', INSUFFICIENT: '부족', UNDETERMINED: '확인 필요' };
+  var evColor = evColorMap[evStatus] || '#65758b';
+  var evLabel = evLabelMap[evStatus] || evStatus;
   
   evBadge.textContent = evLabel;
-  evBadge.style.background = `rgba(${evColor === '#2d7d5a' ? '45,125,90' : evColor === '#c0392b' ? '192,57,43' : '184,134,11'}, 0.12)`;
+  evBadge.style.background = 'rgba(' + (evColor === '#2d7d5a' ? '45,125,90' : evColor === '#c0392b' ? '192,57,43' : '184,134,11') + ', 0.12)';
   evBadge.style.color = evColor;
   
   rdBadge.textContent = r.readiness.label;
@@ -506,177 +522,184 @@ function render(input, r) {
   amBadge.textContent = r.readiness.status === 'NOT_APPLICABLE' ? '—' : '잠정 추정';
   amBadge.className = 'badge ' + (r.readiness.status === 'NOT_APPLICABLE' ? 'badge-gray' : 'badge-warn');
   
-  // ── 금액 카드 ──
-  document.getElementById('credit-percent').textContent = (r.breached && r.tier) ? r.tier.percent + '%' : '—';
-  document.getElementById('credit-range').textContent = (r.breached && r.tier) ? r.tier.range : '—';
+  // 금액 카드
+  el('credit-percent').textContent = (r.breached && r.tier) ? r.tier.percent + '%' : '—';
+  el('credit-range').textContent = (r.breached && r.tier) ? r.tier.range : '—';
   
-  // ── 계산 테이블 ──
-  const incStr = r.incidents.map(function(i) {
-    return msToRFC3339(i.start) + ' ~ ' + msToRFC3339(i.end);
-  }).join(', ') || '없음';
+  // 계산 테이블
+  var incStr = '';
+  if (r.incidents && r.incidents.length > 0) {
+    var parts = [];
+    for (var i = 0; i < r.incidents.length; i++) {
+      parts.push(msToRFC3339(r.incidents[i].start) + ' ~ ' + msToRFC3339(r.incidents[i].end));
+    }
+    incStr = parts.join(', ');
+  } else {
+    incStr = '없음';
+  }
   
-  document.getElementById('calc-incidents').textContent = incStr;
-  document.getElementById('calc-total-min').textContent = r.totalMinutes + ' 분';
-  document.getElementById('calc-gross').textContent = r.grossOutage + ' 분';
-  document.getElementById('calc-excluded').textContent = r.excluded + ' 분';
-  document.getElementById('calc-eligible').textContent = r.eligible + ' 분';
-  document.getElementById('calc-mup-raw').textContent = r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—';
-  document.getElementById('calc-mup-display').textContent = r.displayMup !== null ? r.displayMup + '%' : '—';
+  el('calc-incidents').textContent = incStr;
+  el('calc-total-min').textContent = r.totalMinutes + ' 분';
+  el('calc-gross').textContent = r.grossOutage + ' 분';
+  el('calc-excluded').textContent = r.excluded + ' 분';
+  el('calc-eligible').textContent = r.eligible + ' 분';
+  el('calc-mup-raw').textContent = r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—';
+  el('calc-mup-display').textContent = r.displayMup !== null ? r.displayMup + '%' : '—';
   
-  const breachText = r.breached === true ? 'SLA 위반 발생' : (r.breached === false ? 'SLA 위반 없음 (≥ 99.90%)' : '계산 불가');
-  const breachColor = r.breached === true ? '#c0392b' : (r.breached === false ? '#2d7d5a' : '#b8860b');
-  document.getElementById('calc-breach').textContent = breachText;
-  document.getElementById('calc-breach').style.color = breachColor;
+  var breachText = r.breached === true ? 'SLA 위반 발생' : (r.breached === false ? 'SLA 위반 없음 (≥ 99.90%)' : '계산 불가');
+  var breachColor = r.breached === true ? '#c0392b' : (r.breached === false ? '#2d7d5a' : '#b8860b');
+  el('calc-breach').textContent = breachText;
+  el('calc-breach').style.color = breachColor;
   
-  const tierText = (r.breached && r.tier) ? `${r.tier.percent}% 크레딧 (${r.tier.range})` : (r.breached === false ? '해당 없음' : '계산 불가');
-  document.getElementById('calc-tier').textContent = tierText;
-  document.getElementById('calc-tier').style.color = (r.breached && r.tier) ? 'var(--color-surface-strong)' : 'var(--color-text-secondary)';
+  var tierText = (r.breached && r.tier) ? r.tier.percent + '% 크레딧 (' + r.tier.range + ')' : (r.breached === false ? '해당 없음' : '계산 불가');
+  el('calc-tier').textContent = tierText;
+  el('calc-tier').style.color = (r.breached && r.tier) ? 'var(--color-surface-strong)' : 'var(--color-text-secondary)';
   
   // ── Claim Pack 섹션 ──
   
   // 섹션 1: 장애 요약
-  document.getElementById('section-1-body').innerHTML = `
-    <table class="claim-table">
-      <tr><td>폐쇄 월</td><td>${r.monthLabel}</td></tr>
-      <tr><td>프로젝트 ID</td><td>${esc(ext.project_id)}</td></tr>
-      <tr><td>인스턴스 ID</td><td>${esc(ext.instance_id)}</td></tr>
-      <tr><td>리전</td><td>${esc(ext.region)}</td></tr>
-      <tr><td>NIC</td><td>${esc(ext.nic)}</td></tr>
-      <tr><td>네트워크 등급</td><td>${esc(ext.network_tier)}</td></tr>
-      <tr><td>머신 시리즈</td><td>${esc(ext.series)}</td></tr>
-      <tr><td>프로비저닝</td><td>${esc(ext.provisioning)}</td></tr>
-      <tr><td>장애 유형</td><td>${esc(ext.outage_type)}</td></tr>
-      <tr><td>장애 구간 (union 후)</td><td>${incStr || '없음'}</td></tr>
-      <tr><td>사람 요약</td><td style="color: var(--color-text-secondary);">단일 instance / 단일 NIC / 단일 tier / 폐쇄 월 기준 외부 연결 손실 구간 정리</td></tr>
-    </table>
-  `;
+  var sec1 = '<table class="claim-table">';
+  sec1 += '<tr><td>폐쇄 월</td><td>' + r.monthLabel + '</td></tr>';
+  sec1 += '<tr><td>프로젝트 ID</td><td>' + esc(ext.project_id) + '</td></tr>';
+  sec1 += '<tr><td>인스턴스 ID</td><td>' + esc(ext.instance_id) + '</td></tr>';
+  sec1 += '<tr><td>리전</td><td>' + esc(ext.region) + '</td></tr>';
+  sec1 += '<tr><td>NIC</td><td>' + esc(ext.nic) + '</td></tr>';
+  sec1 += '<tr><td>네트워크 등급</td><td>' + esc(ext.network_tier) + '</td></tr>';
+  sec1 += '<tr><td>머신 시리즈</td><td>' + esc(ext.series) + '</td></tr>';
+  sec1 += '<tr><td>프로비저닝</td><td>' + esc(ext.provisioning) + '</td></tr>';
+  sec1 += '<tr><td>장애 유형</td><td>' + esc(ext.outage_type) + '</td></tr>';
+  sec1 += '<tr><td>장애 구간 (union 후)</td><td>' + incStr + '</td></tr>';
+  sec1 += '<tr><td>사람 요약</td><td style="color: var(--color-text-secondary);">단일 instance / 단일 NIC / 단일 tier / 폐쇄 월 기준 외부 연결 손실 구간 정리</td></tr>';
+  sec1 += '</table>';
+  el('section-1-body').innerHTML = sec1;
   
   // 섹션 2: SLA 계산 근거
-  document.getElementById('section-2-body').innerHTML = `
-    <table class="claim-table">
-      <tr><td>SLO 기준</td><td>≥ 99.90%</td></tr>
-      <tr><td>월 총 분</td><td>${r.totalMinutes} 분</td></tr>
-      <tr><td>전체 장애 (분, union 후)</td><td>${r.grossOutage} 분</td></tr>
-      <tr><td>검증된 제외 (분)</td><td>${r.excluded} 분</td></tr>
-      <tr><td>적격 장애 (분)</td><td>${r.eligible} 분</td></tr>
-      <tr><td>장애 구간 (union 전/후)</td><td>${r.beforeUnion} / ${r.afterUnion}</td></tr>
-      <tr><td>월 가동률 (실제, unrounded)</td><td style="font-weight: 600;">${r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—'}</td></tr>
-      <tr><td>월 가동률 (표시, rounded)</td><td>${r.displayMup !== null ? r.displayMup + '%' : '—'}</td></tr>
-      <tr><td>Breach 여부</td><td style="color: ${breachColor}; font-weight: 600;">${breachText}</td></tr>
-      <tr><td>크레딧 등급</td><td style="color: var(--color-surface-strong);">${tierText}</td></tr>
-    </table>
-  `;
+  var sec2 = '<table class="claim-table">';
+  sec2 += '<tr><td>SLO 기준</td><td>≥ 99.90%</td></tr>';
+  sec2 += '<tr><td>월 총 분</td><td>' + r.totalMinutes + ' 분</td></tr>';
+  sec2 += '<tr><td>전체 장애 (분, union 후)</td><td>' + r.grossOutage + ' 분</td></tr>';
+  sec2 += '<tr><td>검증된 제외 (분)</td><td>' + r.excluded + ' 분</td></tr>';
+  sec2 += '<tr><td>적격 장애 (분)</td><td>' + r.eligible + ' 분</td></tr>';
+  sec2 += '<tr><td>장애 구간 (union 전/후)</td><td>' + r.beforeUnion + ' / ' + r.afterUnion + '</td></tr>';
+  sec2 += '<tr><td>월 가동률 (실제, unrounded)</td><td style="font-weight: 600;">' + (r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—') + '</td></tr>';
+  sec2 += '<tr><td>월 가동률 (표시, rounded)</td><td>' + (r.displayMup !== null ? r.displayMup + '%' : '—') + '</td></tr>';
+  sec2 += '<tr><td>Breach 여부</td><td style="color: ' + breachColor + '; font-weight: 600;">' + breachText + '</td></tr>';
+  sec2 += '<tr><td>크레딧 등급</td><td style="color: var(--color-surface-strong);">' + tierText + '</td></tr>';
+  sec2 += '</table>';
+  el('section-2-body').innerHTML = sec2;
   
   // 섹션 3: 증빙 체크리스트
-  document.getElementById('section-3-body').innerHTML = `
-    <table class="claim-table">
-      <tr><td>numeric_instance_id</td><td style="color: ${evColor};">${esc(ext.instance_id)}</td></tr>
-      <tr><td>project_id</td><td style="color: ${evColor};">${esc(ext.project_id)}</td></tr>
-      <tr><td>outage_timestamp</td><td style="color: ${evColor};">입력된 outage start/end (${incStr || '없음'})</td></tr>
-      <tr><td>external_connectivity_loss_log</td><td style="color: ${evColor};">${esc(input.logs || '미입력')}</td></tr>
-    </table>
-    <div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">SUFFICIENT는 MVP 최소 기준 충족을 의미해요. Google의 최종 증빙 승인이나 credit 승인을 의미하지 않아요.</div>
-  `;
+  var sec3 = '<table class="claim-table">';
+  sec3 += '<tr><td>numeric_instance_id</td><td style="color: ' + evColor + ';">' + esc(ext.instance_id) + '</td></tr>';
+  sec3 += '<tr><td>project_id</td><td style="color: ' + evColor + ';">' + esc(ext.project_id) + '</td></tr>';
+  sec3 += '<tr><td>outage_timestamp</td><td style="color: ' + evColor + ';">입력된 outage start/end (' + incStr + ')</td></tr>';
+  sec3 += '<tr><td>external_connectivity_loss_log</td><td style="color: ' + evColor + ';">' + esc(input.logs || '미입력') + '</td></tr>';
+  sec3 += '</table>';
+  sec3 += '<div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">SUFFICIENT는 MVP 최소 기준 충족을 의미해요. Google의 최종 증빙 승인이나 credit 승인을 의미하지 않아요.</div>';
+  el('section-3-body').innerHTML = sec3;
   
   // 섹션 4: 확인 필요 항목
-  document.getElementById('section-4-body').innerHTML = `
-    <table class="claim-table">
-      <tr><td>청구 기한 기준 확인</td><td style="color: var(--color-text-secondary);">SLA 본문(eligible 시점부터 60일) vs 공식 제출 폼(해당 월 종료 후 60일) 표현 차이 확인 필요</td></tr>
-      <tr><td>billing basis 확인</td><td style="color: var(--color-text-secondary);">예상 금액은 billing basis 확인 전까지 잠정값</td></tr>
-      <tr><td>리전 확인</td><td style="color: var(--color-text-secondary);">region 미확인 시 재확인</td></tr>
-      <tr><td>최대 cap 해석</td><td style="color: var(--color-text-secondary);">공식 규칙 범위 내, billing basis에 따라 확정</td></tr>
-    </table>
-    <div class="warning-box" style="margin-top: 8px;">이 Pack은 청구 검토 준비를 정리한 자료예요. 실제 지원 신청·통지·검토·승인·지급을 대신하지 않아요.</div>
-  `;
+  var sec4 = '<table class="claim-table">';
+  sec4 += '<tr><td>청구 기한 기준 확인</td><td style="color: var(--color-text-secondary);">SLA 본문(eligible 시점부터 60일) vs 공식 제출 폼(해당 월 종료 후 60일) 표현 차이 확인 필요</td></tr>';
+  sec4 += '<tr><td>billing basis 확인</td><td style="color: var(--color-text-secondary);">예상 금액은 billing basis 확인 전까지 잠정값</td></tr>';
+  sec4 += '<tr><td>리전 확인</td><td style="color: var(--color-text-secondary);">region 미확인 시 재확인</td></tr>';
+  sec4 += '<tr><td>최대 cap 해석</td><td style="color: var(--color-text-secondary);">공식 규칙 범위 내, billing basis에 따라 확정</td></tr>';
+  sec4 += '</table>';
+  sec4 += '<div class="warning-box" style="margin-top: 8px;">이 Pack은 청구 검토 준비를 정리한 자료예요. 실제 지원 신청·통지·검토·승인·지급을 대신하지 않아요.</div>';
+  el('section-4-body').innerHTML = sec4;
   
   // 섹션 5: 제출 정보 + Support 문의 초안
-  const creditStr = (r.breached && r.tier) ? `${r.tier.percent}% 크레딧 (${r.tier.range})` : (r.breached === false ? '해당 없음 (99.90% 이상)' : '계산 불가');
-  const breachStr = r.breached === true ? '위반 (Breach)' : (r.breached === false ? '위반 없음' : '계산 불가');
+  var creditStr = (r.breached && r.tier) ? r.tier.percent + '% 크레딧 (' + r.tier.range + ')' : (r.breached === false ? '해당 없음 (99.90% 이상)' : '계산 불가');
+  var breachStr = r.breached === true ? '위반 (Breach)' : (r.breached === false ? '위반 없음' : '계산 불가');
   
-  document.getElementById('section-5-body').innerHTML = `
-    <table class="claim-table">
-      <tr><td>covered_service</td><td>Single Instance</td></tr>
-      <tr><td>instance_id</td><td>${esc(ext.instance_id)}</td></tr>
-      <tr><td>project_id</td><td>${esc(ext.project_id)}</td></tr>
-      <tr><td>region</td><td>${esc(ext.region)}</td></tr>
-      <tr><td>network_tier</td><td>${esc(ext.network_tier)}</td></tr>
-      <tr><td>outage_date_time</td><td>${incStr || '입력된 outage start/end'}</td></tr>
-      <tr><td>outage_logs</td><td>${esc(input.logs || '미입력')}</td></tr>
-      <tr><td>case_id</td><td>${esc(input.case_id)}</td></tr>
-      <tr><td>google_incident_link</td><td>${esc(input.google_incident_link)}</td></tr>
-    </table>
-    <div class="disclaimer">실제 제출은 사용자가 수행합니다. 실제 승인/지급을 보장하지 않으며, 법률 자문이 아닙니다.</div>
-    <hr style="border: none; border-top: 1px solid var(--color-border-default); margin: 12px 0;">
-    <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--color-text-primary);">✉️ Support 문의 초안 (제출 전 초안, 사람 검토 필요)</h3>
-    <div style="background: #f8fafc; border: 1px solid var(--color-border-default); border-radius: 6px; padding: 12px; font-size: 12px; white-space: pre-wrap; color: var(--color-text-primary); line-height: 1.6;">
-Subject: SLA Credit Request — ${esc(ext.project_id)} / Instance ${esc(ext.instance_id)} / ${r.monthLabel}
-
-안녕하세요, ${esc(ext.project_id)} 프로젝트의 SLA 크레딧 요청을 드립니다.
-
-■ 장애 개요
-- 프로젝트: ${esc(ext.project_id)}
-- 인스턴스 ID: ${esc(ext.instance_id)}
-- 리전: ${esc(ext.region)}
-- 네트워크 등급: ${esc(ext.network_tier)}
-- 장애 유형: ${esc(ext.outage_type)}
-- 폐쇄 월: ${r.monthLabel}
-- 장애 구간 (union 후): ${incStr || '없음'}
-
-■ 계산 결과 (사전 검토용)
-- 월 총 분: ${r.totalMinutes} 분
-- 전체 장애: ${r.grossOutage} 분 / 검증된 제외: ${r.excluded} 분 / 적격 장애: ${r.eligible} 분
-- 월 가동률(MUP): 실제 ${r.rawMup !== null ? r.rawMup.toFixed(4) : '—'}% / 표시 ${r.displayMup !== null ? r.displayMup : '—'}%
-- SLO 99.90% 대비: ${breachStr}
-- 크레딧 등급: ${creditStr}
-
-■ 증빙 자료
-- Cloud Logging: ${esc(input.logs || '첨부 예정')}
-- 지원 케이스: ${esc(input.case_id)}
-- Google Incident: ${esc(input.google_incident_link)}
-
-■ 요청
-위 내용에 따라 SLA 크레딧 검토를 요청드립니다. 필요 시 추가 증빙을 제공하겠습니다.
-
-참고: 이 초안은 사전 검토용 예시이며, 실제 제출 전 사람이 최종 확인해야 합니다.
-    </div>
-    <div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">위 초안은 입력된 정보를 바탕으로 자동 생성된 참고용이에요. 실제 보내기 전에 사람이 수정해야 해요.</div>
-    <button class="copy-btn" style="margin-top: 8px;" onclick="copySection(5)">이 섹션 복사</button>
-  `;
+  var sec5 = '<table class="claim-table">';
+  sec5 += '<tr><td>covered_service</td><td>Single Instance</td></tr>';
+  sec5 += '<tr><td>instance_id</td><td>' + esc(ext.instance_id) + '</td></tr>';
+  sec5 += '<tr><td>project_id</td><td>' + esc(ext.project_id) + '</td></tr>';
+  sec5 += '<tr><td>region</td><td>' + esc(ext.region) + '</td></tr>';
+  sec5 += '<tr><td>network_tier</td><td>' + esc(ext.network_tier) + '</td></tr>';
+  sec5 += '<tr><td>outage_date_time</td><td>' + incStr + '</td></tr>';
+  sec5 += '<tr><td>outage_logs</td><td>' + esc(input.logs || '미입력') + '</td></tr>';
+  sec5 += '<tr><td>case_id</td><td>' + esc(input.case_id) + '</td></tr>';
+  sec5 += '<tr><td>google_incident_link</td><td>' + esc(input.google_incident_link) + '</td></tr>';
+  sec5 += '</table>';
+  sec5 += '<div class="disclaimer">실제 제출은 사용자가 수행합니다. 실제 승인/지급을 보장하지 않으며, 법률 자문이 아닙니다.</div>';
+  sec5 += '<hr style="border: none; border-top: 1px solid var(--color-border-default); margin: 12px 0;">';
+  sec5 += '<h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--color-text-primary);">✉️ Support 문의 초안 (제출 전 초안, 사람 검토 필요)</h3>';
+  sec5 += '<div style="background: #f8fafc; border: 1px solid var(--color-border-default); border-radius: 6px; padding: 12px; font-size: 12px; white-space: pre-wrap; color: var(--color-text-primary); line-height: 1.6;">';
+  sec5 += 'Subject: SLA Credit Request — ' + esc(ext.project_id) + ' / Instance ' + esc(ext.instance_id) + ' / ' + r.monthLabel + '\n\n';
+  sec5 += '안녕하세요, ' + esc(ext.project_id) + ' 프로젝트의 SLA 크레딧 요청을 드립니다.\n\n';
+  sec5 += '■ 장애 개요\n';
+  sec5 += '- 프로젝트: ' + esc(ext.project_id) + '\n';
+  sec5 += '- 인스턴스 ID: ' + esc(ext.instance_id) + '\n';
+  sec5 += '- 리전: ' + esc(ext.region) + '\n';
+  sec5 += '- 네트워크 등급: ' + esc(ext.network_tier) + '\n';
+  sec5 += '- 장애 유형: ' + esc(ext.outage_type) + '\n';
+  sec5 += '- 폐쇄 월: ' + r.monthLabel + '\n';
+  sec5 += '- 장애 구간 (union 후): ' + incStr + '\n\n';
+  sec5 += '■ 계산 결과 (사전 검토용)\n';
+  sec5 += '- 월 총 분: ' + r.totalMinutes + ' 분\n';
+  sec5 += '- 전체 장애: ' + r.grossOutage + ' 분 / 검증된 제외: ' + r.excluded + ' 분 / 적격 장애: ' + r.eligible + ' 분\n';
+  sec5 += '- 월 가동률(MUP): 실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '% / 표시 ' + (r.displayMup !== null ? r.displayMup : '—') + '%\n';
+  sec5 += '- SLO 99.90% 대비: ' + breachStr + '\n';
+  sec5 += '- 크레딧 등급: ' + creditStr + '\n\n';
+  sec5 += '■ 증빙 자료\n';
+  sec5 += '- Cloud Logging: ' + esc(input.logs || '첨부 예정') + '\n';
+  sec5 += '- 지원 케이스: ' + esc(input.case_id) + '\n';
+  sec5 += '- Google Incident: ' + esc(input.google_incident_link) + '\n\n';
+  sec5 += '■ 요청\n';
+  sec5 += '위 내용에 따라 SLA 크레딧 검토를 요청드립니다. 필요 시 추가 증빙을 제공하겠습니다.\n\n';
+  sec5 += '참고: 이 초안은 사전 검토용 예시이며, 실제 제출 전 사람이 최종 확인해야 합니다.';
+  sec5 += '</div>';
+  sec5 += '<div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">위 초안은 입력된 정보를 바탕으로 자동 생성된 참고용이에요. 실제 보내기 전에 사람이 수정해야 해요.</div>';
+  sec5 += '<button class="copy-btn" style="margin-top: 8px;" onclick="copySection(5)">이 섹션 복사</button>';
+  el('section-5-body').innerHTML = sec5;
+  
+  // UI 보이기
+  el('cards-area').style.display = '';
+  el('calc-section').style.display = '';
+  el('claim-pack-area').style.display = '';
+  el('frozen-note').style.display = '';
+  el('cta-area').style.display = '';
+  el('error-area').style.display = 'none';
 }
 
-function toggleSection(header) {
-  const body = header.nextElementSibling;
-  header.classList.toggle('open');
-  body.classList.toggle('open');
-}
-
-function copySection(num) {
-  const pack = {
+// ── 버튼 연결 ──
+el('btn-reanalyze').addEventListener('click', function() {
+  window.location.href = 'index.html';
+});
+el('btn-back-input').addEventListener('click', function() {
+  window.location.href = 'index.html';
+});
+el('btn-back-error').addEventListener('click', function() {
+  window.location.href = 'index.html';
+});
+el('copy-btn').addEventListener('click', function() {
+  // claim pack 전체를 클립보드로
+  var pack = {
     summary: {
-      month: document.getElementById('hero-month').textContent.replace('분석 대상: ', '').split(' · ')[0],
-      project_id: document.getElementById('calc-incidents')?.textContent || '',
-      instance_id: '',
-      region: '',
+      month: el('hero-month').textContent.replace('분석 대상: ', '').split(' · ')[0],
+      project_id: (el('section-1-body').querySelector('tr:nth-child(2) td:last-child') || {}).textContent || '',
     },
     sla_analysis: {
       slo_percent: 99.9,
-      total_month_minutes: parseInt(document.getElementById('calc-total-min').textContent) || 0,
-      gross_outage_minutes: parseInt(document.getElementById('calc-gross').textContent) || 0,
-      verified_exclusion_minutes: parseInt(document.getElementById('calc-excluded').textContent) || 0,
-      eligible_outage_minutes: parseInt(document.getElementById('calc-eligible').textContent) || 0,
-      unrounded_mup_percent: parseFloat(document.getElementById('calc-mup-raw').textContent) || null,
-      mup_display_percent: parseFloat(document.getElementById('calc-mup-display').textContent) || null,
-      slo_breached: document.getElementById('calc-breach').textContent === 'SLA 위반 발생',
+      total_month_minutes: parseInt(el('calc-total-min').textContent) || 0,
+      gross_outage_minutes: parseInt(el('calc-gross').textContent) || 0,
+      verified_exclusion_minutes: parseInt(el('calc-excluded').textContent) || 0,
+      eligible_outage_minutes: parseInt(el('calc-eligible').textContent) || 0,
+      unrounded_mup_percent: parseFloat(el('calc-mup-raw').textContent) || null,
+      mup_display_percent: parseFloat(el('calc-mup-display').textContent) || null,
+      slo_breached: el('calc-breach').textContent === 'SLA 위반 발생',
       credit_tier: {
-        percent: parseInt(document.getElementById('credit-percent').textContent) || 0,
-        range: document.getElementById('credit-range').textContent,
+        percent: parseInt(el('credit-percent').textContent) || 0,
+        range: el('credit-range').textContent,
       },
     },
     evidence_checklist: {
-      status: document.getElementById('badge-evidence').textContent,
+      status: el('badge-evidence').textContent,
     },
     claim_readiness: {
-      status: document.getElementById('badge-readiness').textContent,
+      status: el('badge-readiness').textContent,
       reason: '청구 검토 준비 상태',
     },
     form_draft: {
@@ -685,53 +708,20 @@ function copySection(num) {
       google_incident_link: 'https://status.cloud.google.com/incidents/sample',
     },
   };
-  const text = JSON.stringify(pack, null, 2);
-  navigator.clipboard.writeText(text).then(function() {
-    alert('Claim Pack JSON을 클립보드에 복사했습니다.');
-  }).catch(function() {
-    alert('복사에 실패했어요.');
-  });
-}
-
-// ── 초기화 ──
-(function init() {
-  const input = getStoredInput();
-  
-  // scope check (간단 버전)
-  if (!input.incidents || input.incidents.length === 0) {
-    r = computeFromInput(input);
-    // scope issue 표시
-    document.getElementById('scope-banner').style.display = 'block';
-    document.getElementById('scope-msg').textContent = '장애 구간이 입력되지 않았어요. 입력 화면으로 돌아가서 장애 구간을 입력해주세요.';
-    render(input, { ...r, scopeIssue: '장애 구간 없음 — 분석 불가' });
-    return;
+  try {
+    var text = JSON.stringify(pack, null, 2);
+    navigator.clipboard.writeText(text).then(function() {
+      alert('Claim Pack JSON을 클립보드에 복사했습니다.');
+    }).catch(function() {
+      alert('복사에 실패했어요.');
+    });
+  } catch (e) {
+    alert('복사 중 오류가 발생했어요: ' + e.message);
   }
-  
-  const r = computeFromInput(input);
-  
-  // scope gate: OUT_OF_SCOPE 체크 (예: region이 비어있거나 특정 조건)
-  let scopeIssue = null;
-  if (input.extract.region && input.extract.region.toLowerCase() === 'mexico') {
-    scopeIssue = 'OUT_OF_SCOPE — 해당 리전(Mexico)은 SLA 범위에서 제외돼요.';
-  }
-  
-  if (scopeIssue) {
-    document.getElementById('scope-banner').style.display = 'block';
-    document.getElementById('scope-msg').textContent = scopeIssue;
-    render(input, { ...r, scopeIssue: scopeIssue });
-  } else {
-    document.getElementById('scope-banner').style.display = 'none';
-    render(input, r);
-  }
-})();
-
-// ── 버튼 연결 ──
-document.getElementById('btn-reanalyze').addEventListener('click', function() {
-  window.location.href = 'index.html';
 });
-document.getElementById('btn-back-input').addEventListener('click', function() {
-  window.location.href = 'index.html';
-});
+
+// ── 실행 ──
+init();
 </script>
 </body>
 </html>
