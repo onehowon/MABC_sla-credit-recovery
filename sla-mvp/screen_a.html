@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLA Recovery - 리소스 확인 및 장애 분석 요청</title>
+<style>
+:root {
+  --font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  --font-base: 16px;
+  --font-weight-base: 400;
+  --font-line-height: 24px;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 36px;
+  --color-text-primary: #0f1729;
+  --color-text-secondary: #48566a;
+  --color-text-inverse: #65758b;
+  --color-surface-raised: #f8fafc;
+  --color-surface-strong: #5a52ff;
+  --color-border-default: #e1e7ef;
+  --color-border-muted: #1d283a;
+  --space-1: 2px; --space-2: 4px; --space-3: 8px; --space-4: 10px; --space-5: 12px; --space-6: 16px; --space-7: 48px; --space-8: 64px;
+  --radius-xs: 4px; --radius-sm: 6px; --radius-md: 8px; --radius-lg: 16px; --radius-xl: 9999px;
+  --motion-instant: 150ms; --motion-fast: 200ms;
+}
+* { box-sizing: border-box; color: var(--color-text-primary); font-family: var(--font-family); font-size: var(--font-base); line-height: var(--font-line-height); }
+body { background: var(--color-surface-raised); margin: 0; padding: var(--space-6); }
+.wrap { max-width: 800px; margin: 0 auto; }
+.header { margin-bottom: var(--space-6); }
+.header h1 { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 var(--space-2); color: var(--color-text-primary); }
+.header p { color: var(--color-text-secondary); margin: 0; font-size: var(--font-size-sm); }
+.demo-badge { display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(90, 82, 255, 0.1); color: var(--color-surface-strong); border: 1px solid var(--color-surface-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-xl); font-size: var(--font-size-xs); font-weight: 500; margin-bottom: var(--space-4); }
+.demo-badge::before { content: ''; width: 8px; height: 8px; background: var(--color-surface-strong); border-radius: 50%; }
+.card { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-5); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+.card h2 { font-size: var(--font-size-md); font-weight: 600; margin: 0 0 var(--space-4); color: var(--color-text-primary); }
+.card h2 .step { display: inline-block; background: var(--color-surface-strong); color: #fff; font-size: var(--font-size-xs); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); margin-right: var(--space-3); }
+.label { display: block; color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-2); }
+.input { width: 100%; background: #fff; border: 1px solid var(--color-border-default); color: var(--color-text-primary); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size: var(--font-size-sm); font-family: inherit; }
+.input:focus { outline: none; border-color: var(--color-surface-strong); box-shadow: 0 0 0 3px rgba(90, 82, 255, 0.12); }
+.input-row { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.input-row .input { flex: 1; min-width: 180px; }
+.textarea { min-height: 100px; resize: vertical; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.field-grid .full { grid-column: 1 / -1; }
+.row { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px dashed var(--color-border-default); }
+.row:last-child { border-bottom: none; }
+.row .k { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.row .v { color: var(--color-surface-strong); font-weight: 500; font-size: var(--font-size-sm); }
+.notice { background: rgba(90, 82, 255, 0.04); border-left: 3px solid var(--color-surface-strong); padding: var(--space-3) var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-top: var(--space-4); }
+.cta { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-6); flex-wrap: wrap; }
+.btn-primary { background: var(--color-surface-strong); color: #fff; border: none; border-radius: var(--radius-md); padding: var(--space-3) var(--space-5); cursor: pointer; font-size: var(--font-size-sm); font-weight: 500; font-family: inherit; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: #fff; color: var(--color-text-primary); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: var(--space-3) var(--space-5); cursor: pointer; font-size: var(--font-size-sm); font-weight: 500; font-family: inherit; }
+.btn-secondary:hover { border-color: var(--color-surface-strong); }
+.footer-note { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border-default); color: var(--color-text-secondary); font-size: var(--font-size-xs); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <span class="demo-badge">데모 모드 — 현재 Google Cloud와 실시간 연동되지 않음</span>
+    <h1>리소스 확인 및 장애 분석 요청</h1>
+    <p>장애 발생 월과 장애 구간을 입력하면 SLA 위반 여부와 예상 서비스 크레딧을 계산해드립니다.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">1</span>폐쇄 월 선택</h2>
+    <div class="field-grid">
+      <div>
+        <label class="label">연도</label>
+        <input class="input" id="year" type="number" value="2025" min="2020" max="2030">
+      </div>
+      <div>
+        <label class="label">월</label>
+        <input class="input" id="month" type="number" value="7" min="1" max="12">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">2</span>장애 구간 (다중 입력 가능)</h2>
+    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); margin: 0 0 var(--space-4);">RFC 3339 형식 또는 시간대 포함 형식으로 입력하세요. 1분 미만 구간은 집계되지 않습니다.</p>
+    <div id="incident-list">
+      <div class="input-row" style="margin-bottom: var(--space-3);">
+        <input class="input" id="start0" type="text" placeholder="시작 예: 2025-07-10T08:00:00Z" value="2025-07-10T08:00:00Z">
+        <input class="input" id="end0" type="text" placeholder="종료 예: 2025-07-10T08:35:00Z" value="2025-07-10T08:35:00Z">
+      </div>
+      <div class="input-row" style="margin-bottom: var(--space-3);">
+        <input class="input" id="start1" type="text" placeholder="시작" value="2025-07-15T12:00:00Z">
+        <input class="input" id="end1" type="text" placeholder="종료" value="2025-07-15T12:20:00Z">
+      </div>
+    </div>
+    <button class="btn-secondary" id="add-incident" style="margin-top: var(--space-2);">+ 장애 구간 추가</button>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span>증거 / 참고 자료</h2>
+    <label class="label">Cloud Logging excerpt, 모니터링 그래프 링크, 지원 케이스 번호, Google Incident 링크 등</label>
+    <textarea class="input textarea" id="logs" placeholder="장애 관련 참고 자료를 텍스트로 붙여넣거나 설명해주세요.">Cloud Logging excerpt showing external connectivity loss at outage start/end</textarea>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">4</span>리소스 정보 (Agent 추출값 — 직접 확정 가능)</h2>
+    <div class="field-grid">
+      <div class="full">
+        <div class="row"><span class="k">프로젝트 ID</span><span class="v">my-sla-recovery-project</span></div>
+        <div class="row"><span class="k">인스턴스 ID</span><span class="v">1234567890123456789</span></div>
+        <div class="row"><span class="k">NIC</span><span class="v">nic0</span></div>
+        <div class="row"><span class="k">네트워크 등급</span><span class="v">Premium</span></div>
+        <div class="row"><span class="k">머신 시리즈</span><span class="v">E2</span></div>
+        <div class="row"><span class="k">프로비저닝</span><span class="v">standard</span></div>
+        <div class="row"><span class="k">리전</span><span class="v">us-central1</span></div>
+        <div class="row"><span class="k">장애 유형</span><span class="v">external connectivity loss</span></div>
+      </div>
+    </div>
+    <div class="notice">위 정보는 Agent가 문서에서 추출한 값이에요. 필요하면 직접 수정할 수 있어요. 계산에는 리소스 정보가 필요해요.</div>
+  </div>
+
+  <div class="cta">
+    <button class="btn-primary" id="analyze-btn">분석하기</button>
+    <span style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">입력 내용을 바탕으로 계산 결과가 새 화면에 표시돼요.</span>
+  </div>
+
+  <div class="footer-note">
+    <strong>참고:</strong> 현재 데모 모드에서는 실제 Google Cloud 프로젝트와의 연동 없이 샘플 데이터로 계산 결과를 보여드려요.<br>
+    지원 케이스 ID: support-case-12345 &nbsp;|&nbsp; Google Incident: https://status.cloud.google.com/incidents/sample
+  </div>
+</div>
+
+<script>
+document.getElementById('add-incident').addEventListener('click', () => {
+  const container = document.getElementById('incident-list');
+  const i = container.children.length;
+  const div = document.createElement('div');
+  div.className = 'input-row';
+  div.style.marginBottom = '12px';
+  div.innerHTML = `<input class="input" id="start${i}" type="text" placeholder="시작"><input class="input" id="end${i}" type="text" placeholder="종료">`;
+  container.appendChild(div);
+});
+
+document.getElementById('analyze-btn').addEventListener('click', () => {
+  const year = document.getElementById('year').value;
+  const month = document.getElementById('month').value;
+  const incidents = [];
+  document.querySelectorAll('#incident-list .input-row').forEach(row => {
+    const s = row.querySelector('input#start').value;
+    const e = row.querySelector('input#end').value;
+    if (s && e) incidents.push({ start: s, end: e });
+  });
+  const logs = document.getElementById('logs').value;
+  if (!year || !month || incidents.length === 0) {
+    alert('연도, 월, 장애 구간을 모두 입력해주세요.');
+    return;
+  }
+  sessionStorage.setItem('sla_input', JSON.stringify({
+    year: parseInt(year),
+    month: parseInt(month),
+    incidents: incidents,
+    logs: logs
+  }));
+  window.location.href = 'screen_b.html';
+});
+</script>
+</body>
+</html>
