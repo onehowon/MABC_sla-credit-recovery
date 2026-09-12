@@ -3,4 +3,632 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title
+<title>SLA Recovery - 분석 결과</title>
+<style>
+:root {
+  --font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  --font-base: 16px; --font-weight-base: 400; --font-line-height: 24px;
+  --font-size-xs: 12px; --font-size-sm: 14px; --font-size-md: 16px; --font-size-lg: 20px; --font-size-xl: 36px;
+  --color-text-primary: #0f1729; --color-text-secondary: #48566a; --color-text-inverse: #65758b;
+  --color-surface-raised: #f8fafc; --color-surface-strong: #5a52ff;
+  --color-border-default: #e1e7ef; --color-border-muted: #1d283a;
+  --space-1: 2px; --space-2: 4px; --space-3: 8px; --space-4: 10px; --space-5: 12px; --space-6: 16px; --space-7: 48px; --space-8: 64px;
+  --radius-xs: 4px; --radius-sm: 6px; --radius-md: 8px; --radius-lg: 16px; --radius-xl: 9999px;
+  --motion-instant: 150ms; --motion-fast: 200ms;
+}
+* { box-sizing: border-box; color: var(--color-text-primary); font-family: var(--font-family); font-size: var(--font-base); line-height: var(--font-line-height); }
+body { background: var(--color-surface-raised); margin: 0; padding: var(--space-6); }
+.wrap { max-width: 800px; margin: 0 auto; }
+.back-link { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-secondary); font-size: var(--font-size-sm); text-decoration: none; margin-bottom: var(--space-5); }
+.back-link:hover { color: var(--color-surface-strong); }
+.back-link::before { content: '←'; }
+.demo-badge { display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(90, 82, 255, 0.1); color: var(--color-surface-strong); border: 1px solid var(--color-surface-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-xl); font-size: var(--font-size-xs); font-weight: 500; margin-bottom: var(--space-4); }
+.demo-badge::before { content: ''; width: 8px; height: 8px; background: var(--color-surface-strong); border-radius: 50%; }
+.hero { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-5); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.hero h1 { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 var(--space-2); }
+.hero .month-label { color: var(--color-text-secondary); font-size: var(--font-size-md); margin-bottom: var(--space-4); }
+.hero .conclusion { display: flex; align-items: center; gap: var(--space-4); margin: var(--space-4) 0; padding: var(--space-4); background: rgba(90, 82, 255, 0.06); border-radius: var(--radius-md); border: 1px solid var(--color-surface-strong); }
+.hero .conclusion .icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl); font-weight: 700; background: var(--color-surface-strong); color: #fff; flex-shrink: 0; }
+.hero .conclusion .text { flex: 1; }
+.hero .conclusion .text .label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.hero .conclusion .text .value { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: 2px; }
+.hero .conclusion .text .sub { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.cards { display: grid; grid-template-columns: 1fr; gap: var(--space-4); margin-bottom: var(--space-5); }
+.card { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: var(--space-5); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+.card h3 { font-size: var(--font-size-sm); font-weight: 600; margin: 0 0 var(--space-3); color: var(--color-text-primary); }
+.card .status-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-default); gap: var(--space-3); }
+.card .status-row:last-child { border-bottom: none; }
+.card .status-row .k { color: var(--color-text-secondary); font-size: var(--font-size-sm); flex: 1; }
+.card .status-row .v { font-size: var(--font-size-sm); font-weight: 500; flex-shrink: 0; }
+.badge { display: inline-block; padding: var(--space-1) var(--space-3); border-radius: var(--radius-xl); font-size: var(--font-size-xs); font-weight: 500; white-space: nowrap; }
+.badge-green { background: rgba(45, 125, 90, 0.12); color: #2d7d5a; }
+.badge-warn { background: rgba(184, 134, 11, 0.12); color: #b8860b; }
+.badge-red { background: rgba(192, 57, 43, 0.12); color: #c0392b; }
+.badge-gray { background: rgba(101, 117, 139, 0.12); color: #65758b; }
+.calc-section { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-5); }
+.calc-section h3 { font-size: var(--font-size-md); margin: 0 0 var(--space-4); color: var(--color-text-primary); }
+.calc-table { width: 100%; border-collapse: collapse; }
+.calc-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-default); font-size: var(--font-size-sm); }
+.calc-table td:first-child { color: var(--color-text-secondary); }
+.calc-table td:last-child { text-align: right; font-weight: 500; }
+.calc-highlight { background: rgba(90, 82, 255, 0.04); }
+.claim-pack { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--space-5); }
+.claim-section { border-bottom: 1px solid var(--color-border-default); }
+.claim-section:last-child { border-bottom: none; }
+.claim-section-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) var(--space-5); background: rgba(90, 82, 255, 0.04); cursor: pointer; }
+.claim-section-header h3 { font-size: var(--font-size-sm); font-weight: 600; margin: 0; color: var(--color-text-primary); }
+.claim-section-header .toggle-icon { transition: transform var(--motion-fast); font-size: var(--font-size-sm); }
+.claim-section-header.open .toggle-icon { transform: rotate(180deg); }
+.claim-section-body { padding: var(--space-4) var(--space-5); display: none; }
+.claim-section-body.open { display: block; }
+.claim-table { width: 100%; border-collapse: collapse; }
+.claim-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-default); font-size: var(--font-size-sm); vertical-align: top; }
+.claim-table td:first-child { color: var(--color-text-secondary); width: 35%; }
+.claim-section-body .disclaimer { margin-top: var(--space-3); padding: var(--space-3); background: rgba(90, 82, 255, 0.04); border-left: 2px solid var(--color-surface-strong); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.copy-btn { background: none; border: 1px solid var(--color-border-default); color: var(--color-text-secondary); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-3); font-size: var(--font-size-xs); cursor: pointer; font-family: inherit; }
+.copy-btn:hover { border-color: var(--color-surface-strong); color: var(--color-surface-strong); }
+.warning-box { background: rgba(240, 185, 90, 0.08); border-left: 3px solid #f0b95a; padding: var(--space-3) var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-top: var(--space-4); }
+.cta { display: flex; gap: var(--space-3); margin-top: var(--space-5); }
+.btn { background: var(--color-surface-strong); color: #fff; border: none; border-radius: var(--radius-md); padding: var(--space-3) var(--space-5); cursor: pointer; font-size: var(--font-size-sm); font-weight: 500; font-family: inherit; }
+.btn:hover { opacity: 0.9; }
+.btn-ghost { background: #fff; color: var(--color-text-primary); border: 1px solid var(--color-border-default); }
+.btn-ghost:hover { border-color: var(--color-surface-strong); }
+.frozen-note { background: rgba(90, 82, 255, 0.04); border: 1px solid var(--color-surface-strong); border-radius: var(--radius-md); padding: var(--space-4); margin-top: var(--space-5); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.frozen-note strong { color: var(--color-text-primary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="index.html">입력 화면으로 돌아가기</a>
+  <span class="demo-badge">데모 모드 — Google Cloud 실시간 연동 없이 샘플 데이터 기반 계산</span>
+
+  <div class="hero">
+    <p class="month-label" id="hero-month">분석 대상: —</p>
+    <h1 id="hero-title">분석 결과</h1>
+    <div class="conclusion" id="hero-conclusion">
+      <div class="icon" id="hero-icon">?</div>
+      <div class="text">
+        <div class="label">결론</div>
+        <div class="value" id="hero-value">계산 중…</div>
+        <div class="sub" id="hero-sub">입력값을 바탕으로 계산됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>📋 증빙 상태</h3>
+      <div class="status-row"><span class="k">증거 평가</span><span class="v"><span class="badge" id="badge-evidence">—</span></span></div>
+      <div class="status-row"><span class="k">청구 검토 준비</span><span class="v"><span class="badge" id="badge-readiness">—</span></span></div>
+      <div class="status-row"><span class="k">금액 확정성</span><span class="v"><span class="badge" id="badge-amount">—</span></span></div>
+    </div>
+    <div class="card">
+      <h3>💰 예상 금액</h3>
+      <div class="status-row"><span class="k">크레딧 비율</span><span class="v" id="credit-percent" style="color: var(--color-surface-strong); font-size: var(--font-size-lg);">—</span></div>
+      <div class="status-row"><span class="k">크레딧 등급 범위</span><span class="v" id="credit-range">—</span></div>
+      <div class="status-row" style="margin-top: var(--space-2);"><span class="k" style="font-size: var(--font-size-xs);">참고</span><span class="v" style="color: var(--color-text-secondary); font-size: var(--font-size-xs); width: 100%;">billing basis 확인 전 잠정 추정값이에요. 실제 승인 금액을 보장하지 않아요.</span></div>
+    </div>
+    <div class="card">
+      <h3>⏰ 청구 기한</h3>
+      <div class="status-row"><span class="k">청구 통지 기한</span><span class="v" style="color: var(--color-text-secondary);">기준 확인 필요</span></div>
+      <div class="status-row"><span class="k">기한 기준점</span><span class="v" style="color: var(--color-text-secondary); font-size: var(--font-size-xs); width: 100%;">SLA 본문: eligible 시점부터 60일 / 공식 제출 폼: 해당 월 종료 후 60일</span></div>
+      <div class="warning-box" style="margin-top: var(--space-3);">청구 기한 기준 표현은 SLA 본문과 공식 제출 폼 간 차이가 있어요. 사람이 확인해야 하는 부분이에요.</div>
+    </div>
+  </div>
+
+  <div class="calc-section">
+    <h3>📐 계산 근거</h3>
+    <table class="calc-table" id="calc-table">
+      <tr><td>입력된 장애 구간</td><td id="calc-incidents">—</td></tr>
+      <tr><td>월 총 분</td><td id="calc-total-min">—</td></tr>
+      <tr><td>전체 장애 (분, union 후)</td><td id="calc-gross">—</td></tr>
+      <tr><td>검증된 제외 (분)</td><td id="calc-excluded">—</td></tr>
+      <tr><td>적격 장애 (분)</td><td id="calc-eligible">—</td></tr>
+      <tr class="calc-highlight"><td>월 가동률 (MUP) — 실제 (unrounded)</td><td id="calc-mup-raw">—</td></tr>
+      <tr class="calc-highlight"><td>월 가동률 (MUP) — 표시 (rounded)</td><td id="calc-mup-display">—</td></tr>
+      <tr><td>Breach 여부 (< 99.90%)</td><td id="calc-breach">—</td></tr>
+      <tr><td>크레딧 등급</td><td id="calc-tier">—</td></tr>
+    </table>
+  </div>
+
+  <div style="font-size: var(--font-size-md); font-weight: 600; margin: var(--space-5) 0 var(--space-3); color: var(--color-text-primary);">📦 Claim Pack — 제출 준비 자료 (Frozen 5종)</div>
+  <div class="claim-pack" style="margin-bottom: var(--space-6);">
+    <div class="claim-section">
+      <div class="claim-section-header" onclick="toggleSection(this)">
+        <h3>1. 장애 요약 <span class="toggle-icon">▼</span></h3>
+      </div>
+      <div class="claim-section-body" id="section-1-body"></div>
+    </div>
+    <div class="claim-section">
+      <div class="claim-section-header" onclick="toggleSection(this)">
+        <h3>2. SLA 계산 근거 <span class="toggle-icon">▼</span></h3>
+      </div>
+      <div class="claim-section-body" id="section-2-body"></div>
+    </div>
+    <div class="claim-section">
+      <div class="claim-section-header" onclick="toggleSection(this)">
+        <h3>3. 증빙 체크리스트 <span class="toggle-icon">▼</span></h3>
+      </div>
+      <div class="claim-section-body" id="section-3-body"></div>
+    </div>
+    <div class="claim-section">
+      <div class="claim-section-header" onclick="toggleSection(this)">
+        <h3>4. 확인 필요 항목 <span class="toggle-icon">▼</span></h3>
+      </div>
+      <div class="claim-section-body" id="section-4-body"></div>
+    </div>
+    <div class="claim-section">
+      <div class="claim-section-header" onclick="toggleSection(this)">
+        <h3>5. 제출 정보 + Support 문의 초안 <span class="toggle-icon">▼</span></h3>
+      </div>
+      <div class="claim-section-body" id="section-5-body"></div>
+    </div>
+  </div>
+
+  <div class="frozen-note">
+    <strong>Frozen 정책 기준:</strong> 이 화면의 모든 수치는 브라우저에서 RFC3339 파싱 → 월 clip/split → union → 1분 미만 미집계 → verified exclusion 차감 → raw MUP 산출 → tier 판정 순서로 계산됩니다. (calculator.py와 동일 로직, pre-check 등급 기준)
+  </div>
+
+  <div class="cta">
+    <button class="btn" id="btn-reanalyze">분석 다시 하기</button>
+    <button class="btn btn-ghost" id="btn-back-input">입력 화면으로</button>
+  </div>
+</div>
+
+<script>
+// ── 경량 SLA 계산기 (Frozen calculator.py 동일 로직) ──
+function parseUTC(s) {
+  s = String(s).trim();
+  let off = 0;
+  if (s.endsWith('Z') || s.endsWith('z')) s = s.slice(0, -1);
+  else if (s.includes('T')) {
+    const [datePart, timePart] = s.split('T');
+    if (timePart.includes('+')) {
+      const [t, o] = timePart.split('+');
+      s = datePart + 'T' + t;
+      off = -parseOffset(o);
+    } else if ((timePart.match(/-/g) || []).length > 1) {
+      const last = timePart.lastIndexOf('-');
+      const t = timePart.slice(0, last);
+      const o = timePart.slice(last + 1);
+      s = datePart + 'T' + t;
+      off = parseOffset('-' + o);
+    }
+  } else {
+    if (s.includes('+')) {
+      const [dp, op] = s.split('+');
+      s = dp; off = -parseOffset(op);
+    } else if ((s.match(/-/g) || []).length > 2) {
+      const last = s.lastIndexOf('-');
+      const dp = s.slice(0, last);
+      const op = s.slice(last + 1);
+      s = dp; off = parseOffset('-' + op);
+    }
+  }
+  const dt = new Date(s + 'T00:00:00Z');
+  return new Date(dt.getTime() - off * 60 * 1000);
+}
+
+function parseOffset(s) {
+  s = s.replace(':', '');
+  let sign = 1;
+  if (s.startsWith('-')) { sign = -1; s = s.slice(1); }
+  else if (s.startsWith('+')) s = s.slice(1);
+  if (s.length === 4) return sign * (parseInt(s.slice(0,2)) * 60 + parseInt(s.slice(2)));
+  if (s.length === 2) return sign * parseInt(s) * 60;
+  return 0;
+}
+
+function minuteFloor(dt) { return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours(), dt.getMinutes(), 0, 0); }
+function minuteCeil(dt) { const f = minuteFloor(dt); return f.getTime() === dt.getTime() ? f : new Date(f.getTime() + 60000); }
+
+function monthBounds(year, month) {
+  const start = new Date(year, month - 1, 1, 0, 0, 0);
+  const lastDay = new Date(year, month, 0).getDate();
+  const end = new Date(year, month - 1, lastDay, 0, 0, 0);
+  return { start, end, totalMinutes: lastDay * 24 * 60 };
+}
+
+function clip(s, e, ms, me) {
+  if (e <= ms || s >= me) return null;
+  const a = s > ms ? s : ms;
+  const b = e < me ? e : me;
+  if (b <= a) return null;
+  return { start: a, end: b };
+}
+
+function union(intervals) {
+  if (!intervals.length) return [];
+  const sorted = intervals.map(i => [i.start.getTime(), i.end.getTime()]).sort((a, b) => a[0] - b[0]);
+  const merged = [[sorted[0][0], sorted[0][1]]];
+  for (let i = 1; i < sorted.length; i++) {
+    const last = merged[merged.length - 1];
+    if (sorted[i][0] <= last[1]) {
+      if (sorted[i][1] > last[1]) last[1] = sorted[i][1];
+    } else {
+      merged.push([sorted[i][0], sorted[i][1]]);
+    }
+  }
+  return merged.map(([s, e]) => ({ start: new Date(s), end: new Date(e) }));
+}
+
+function minutes(intervals, floorRule) {
+  let total = 0;
+  for (const { start, end } of intervals) {
+    let fs, fe;
+    if (floorRule) {
+      fs = minuteCeil(start);
+      fe = minuteFloor(end);
+      if (fe <= fs) continue;
+      total += (fe - fs) / 60000;
+    } else {
+      total += (end - start) / 60000;
+    }
+  }
+  return Math.round(total);
+}
+
+function tier(mup) {
+  if (mup >= 99.90) return null;
+  if (mup >= 95.00) return { percent: 10, range: '95.00% – < 99.90%' };
+  if (mup >= 90.00) return { percent: 25, range: '90.00% – < 95.00%' };
+  return { percent: 100, range: '< 90.00%' };
+}
+
+function readiness(sloBreached, evidenceStatus, billingVerified, deadlineBlocker) {
+  if (sloBreached === null || sloBreached === false) {
+    return { status: 'NOT_APPLICABLE', label: '해당 없음', reason: sloBreached === false ? 'SLO 위반 없음' : '계산 불가' };
+  }
+  if (evidenceStatus === 'INSUFFICIENT' || evidenceStatus === 'UNDETERMINED') {
+    return { status: 'NEEDS_REVIEW', label: '추가 확인 필요', reason: '증거 부족으로 청구 검토 준비 미완료' };
+  }
+  if (deadlineBlocker) {
+    return { status: 'NEEDS_REVIEW', label: '추가 확인 필요', reason: '청구 검토 준비 미완료' };
+  }
+  return { status: 'READY_FOR_HUMAN_CLAIM_REVIEW', label: '청구 검토 준비 완료', reason: '청구 검토 준비 완료' };
+}
+
+// ── 입력값 읽기 + 계산 ──
+function getInput() {
+  const year = parseInt(document.getElementById('year')?.value) || 2025;
+  const month = parseInt(document.getElementById('month')?.value) || 7;
+  const incidents = [];
+  document.querySelectorAll('#incident-list .input-row').forEach(row => {
+    const inputs = row.querySelectorAll('input.input');
+    if (inputs.length >= 2) {
+      const s = inputs[0].value.trim();
+      const e = inputs[1].value.trim();
+      if (s && e) incidents.push({ start: s, end: e });
+    }
+  });
+  const logs = document.getElementById('logs')?.value || '';
+  const extract = {
+    project_id: document.getElementById('field-project_id')?.value || 'my-sla-recovery-project',
+    instance_id: document.getElementById('field-instance_id')?.value || '1234567890123456789',
+    nic: document.getElementById('field-nic')?.value || 'nic0',
+    network_tier: document.getElementById('field-network_tier')?.value || 'Premium',
+    series: document.getElementById('field-series')?.value || 'E2',
+    provisioning: document.getElementById('field-provisioning')?.value || 'standard',
+    region: document.getElementById('field-region')?.value || 'us-central1',
+    outage_type: document.getElementById('field-outage_type')?.value || 'external connectivity loss',
+  };
+  return {
+    year, month, incidents, logs, extract,
+    evidence_status: 'SUFFICIENT',
+    billing_verified: false,
+    deadline_blocker: false,
+    case_id: 'support-case-12345',
+    google_incident_link: 'https://status.cloud.google.com/incidents/sample',
+  };
+}
+
+function compute(input) {
+  const { year, month, incidents } = input;
+  const bounds = monthBounds(year, month);
+  
+  // 장애 clip & union
+  const clipped = incidents.map(it => {
+    const s = parseUTC(it.start);
+    const e = parseUTC(it.end);
+    return clip(s, e, bounds.start, bounds.end);
+  }).filter(Boolean);
+  const unionIn = union(clipped);
+  const gross = minutes(unionIn, true);
+  
+  // exclusion (현재 없음)
+  const excluded = 0;
+  const eligible = Math.max(gross - excluded, 0);
+  const rawMup = bounds.totalMinutes > 0 ? (bounds.totalMinutes - eligible) / bounds.totalMinutes * 100 : null;
+  const displayMup = rawMup !== null ? Math.round(rawMup * 100) / 100 : null;
+  const breached = rawMup !== null && rawMup < 99.9;
+  const t = tier(rawMup);
+  
+  const read = readiness(breached, input.evidence_status, input.billing_verified, input.deadline_blocker);
+  
+  return {
+    monthLabel: `${year}-${String(month).padStart(2, '0')}`,
+    totalMinutes: bounds.totalMinutes,
+    grossOutage: gross,
+    excluded: excluded,
+    eligible: eligible,
+    beforeUnion: incidents.length,
+    afterUnion: unionIn.length,
+    rawMup, displayMup,
+    breached, tier: t,
+    readiness: read,
+    incidents: unionIn,
+  };
+}
+
+// ── 화면 렌더링 ──
+function render(input, r) {
+  // Hero
+  document.getElementById('hero-month').textContent = `분석 대상: ${r.monthLabel} · ${input.extract.project_id} 프로젝트`;
+  const icon = document.getElementById('hero-icon');
+  const valueEl = document.getElementById('hero-value');
+  const subEl = document.getElementById('hero-sub');
+  
+  if (r.breached === false) {
+    icon.style.background = '#2d7d5a';
+    icon.textContent = '✓';
+    valueEl.textContent = 'SLA 위반 없음';
+    valueEl.style.color = '#2d7d5a';
+    subEl.textContent = `월 가동률 ${r.displayMup}% (실제 ${r.rawMup}%) · 크레딧 미해당`;
+  } else if (r.breached === true) {
+    icon.style.background = '#c0392b';
+    icon.textContent = '!';
+    valueEl.textContent = 'SLA 위반 발생';
+    valueEl.style.color = '#c0392b';
+    subEl.textContent = `월 가동률 ${r.displayMup}% (실제 ${r.rawMup}%) · ${r.tier ? r.tier.percent + '% 크레딧 (' + r.tier.range + ')' : '크레딧 미해당'}`;
+  } else {
+    icon.style.background = '#b8860b';
+    icon.textContent = '?';
+    valueEl.textContent = '계산 불가';
+    valueEl.style.color = '#b8860b';
+    subEl.textContent = '월 총 분 계산 불가 또는 장애 정보 부족';
+  }
+  
+  // 증빙 상태 카드
+  const evBadge = document.getElementById('badge-evidence');
+  const rdBadge = document.getElementById('badge-readiness');
+  const amBadge = document.getElementById('badge-amount');
+  
+  const evColor = { SUFFICIENT: '#2d7d5a', INSUFFICIENT: '#c0392b', UNDETERMINED: '#b8860b' }[input.evidence_status] || '#65758b';
+  const evLabel = { SUFFICIENT: '충분', INSUFFICIENT: '부족', UNDETERMINED: '확인 필요' }[input.evidence_status] || input.evidence_status;
+  evBadge.textContent = evLabel;
+  evBadge.style.background = `rgba(${evColor === '#2d7d5a' ? '45,125,90' : evColor === '#c0392b' ? '192,57,43' : '184,134,11'}, 0.12)`;
+  evBadge.style.color = evColor;
+  
+  rdBadge.textContent = r.readiness.label;
+  rdBadge.className = 'badge ' + (
+    r.readiness.status === 'READY_FOR_HUMAN_CLAIM_REVIEW' ? 'badge-green' :
+    r.readiness.status === 'NEEDS_REVIEW' ? 'badge-warn' : 'badge-gray'
+  );
+  
+  amBadge.textContent = r.readiness.status === 'NOT_APPLICABLE' ? '—' : '잠정 추정';
+  amBadge.className = 'badge ' + (r.readiness.status === 'NOT_APPLICABLE' ? 'badge-gray' : 'badge-warn');
+  
+  // 금액 카드
+  document.getElementById('credit-percent').textContent = r.breached && r.tier ? r.tier.percent + '%' : '—';
+  document.getElementById('credit-range').textContent = r.breached && r.tier ? r.tier.range : '—';
+  
+  // 계산 테이블
+  const incStr = r.incidents.map(i => {
+    const s = i.start.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const e = i.end.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    return `${s} ~ ${e}`;
+  }).join(', ') || '없음';
+  document.getElementById('calc-incidents').textContent = incStr;
+  document.getElementById('calc-total-min').textContent = r.totalMinutes + ' 분';
+  document.getElementById('calc-gross').textContent = r.grossOutage + ' 분';
+  document.getElementById('calc-excluded').textContent = r.excluded + ' 분';
+  document.getElementById('calc-eligible').textContent = r.eligible + ' 분';
+  document.getElementById('calc-mup-raw').textContent = r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—';
+  document.getElementById('calc-mup-display').textContent = r.displayMup !== null ? r.displayMup + '%' : '—';
+  document.getElementById('calc-breach').textContent = r.breached === true ? 'SLA 위반 발생' : (r.breached === false ? 'SLA 위반 없음 (≥ 99.90%)' : '계산 불가');
+  document.getElementById('calc-breach').style.color = r.breached === true ? '#c0392b' : (r.breached === false ? '#2d7d5a' : '#b8860b');
+  document.getElementById('calc-tier').textContent = r.breached && r.tier ? `${r.tier.percent}% 크레딧 (${r.tier.range})` : (r.breached === false ? '해당 없음' : '계산 불가');
+  document.getElementById('calc-tier').style.color = r.breached && r.tier ? 'var(--color-surface-strong)' : 'var(--color-text-secondary)';
+  
+  // Claim Pack 섹션
+  const ext = input.extract;
+  
+  // 섹션 1: 장애 요약
+  document.getElementById('section-1-body').innerHTML = `
+    <table class="claim-table">
+      <tr><td>폐쇄 월</td><td>${r.monthLabel}</td></tr>
+      <tr><td>프로젝트 ID</td><td>${esc(ext.project_id)}</td></tr>
+      <tr><td>인스턴스 ID</td><td>${esc(ext.instance_id)}</td></tr>
+      <tr><td>리전</td><td>${esc(ext.region)}</td></tr>
+      <tr><td>NIC</td><td>${esc(ext.nic)}</td></tr>
+      <tr><td>네트워크 등급</td><td>${esc(ext.network_tier)}</td></tr>
+      <tr><td>머신 시리즈</td><td>${esc(ext.series)}</td></tr>
+      <tr><td>프로비저닝</td><td>${esc(ext.provisioning)}</td></tr>
+      <tr><td>장애 유형</td><td>${esc(ext.outage_type)}</td></tr>
+      <tr><td>장애 구간 (union 후)</td><td>${incStr || '없음'}</td></tr>
+      <tr><td>사람 요약</td><td style="color: var(--color-text-secondary);">단일 instance / 단일 NIC / 단일 tier / 폐쇄 월 기준 외부 연결 손실 구간 정리</td></tr>
+    </table>
+  `;
+  
+  // 섹션 2: SLA 계산 근거
+  document.getElementById('section-2-body').innerHTML = `
+    <table class="claim-table">
+      <tr><td>SLO 기준</td><td>≥ 99.90%</td></tr>
+      <tr><td>월 총 분</td><td>${r.totalMinutes} 분</td></tr>
+      <tr><td>전체 장애 (분, union 후)</td><td>${r.grossOutage} 분</td></tr>
+      <tr><td>검증된 제외 (분)</td><td>${r.excluded} 분</td></tr>
+      <tr><td>적격 장애 (분)</td><td>${r.eligible} 분</td></tr>
+      <tr><td>장애 구간 (union 전/후)</td><td>${r.beforeUnion} / ${r.afterUnion}</td></tr>
+      <tr><td>월 가동률 (실제, unrounded)</td><td style="font-weight: 600;">${r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—'}</td></tr>
+      <tr><td>월 가동률 (표시, rounded)</td><td>${r.displayMup !== null ? r.displayMup + '%' : '—'}</td></tr>
+      <tr><td>Breach 여부</td><td style="color: ${r.breached === true ? '#c0392b' : (r.breached === false ? '#2d7d5a' : '#b8860b')}; font-weight: 600;">${r.breached === true ? 'SLA 위반 발생' : (r.breached === false ? 'SLA 위반 없음 (≥ 99.90%)' : '계산 불가')}</td></tr>
+      <tr><td>크레딧 등급</td><td style="color: var(--color-surface-strong);">${r.breached && r.tier ? `${r.tier.percent}% 크레딧 (${r.tier.range})` : (r.breached === false ? '해당 없음' : '계산 불가')}</td></tr>
+    </table>
+  `;
+  
+  // 섹션 3: 증빙 체크리스트
+  document.getElementById('section-3-body').innerHTML = `
+    <table class="claim-table">
+      <tr><td>numeric_instance_id</td><td style="color: #2d7d5a;">${esc(ext.instance_id)}</td></tr>
+      <tr><td>project_id</td><td style="color: #2d7d5a;">${esc(ext.project_id)}</td></tr>
+      <tr><td>outage_timestamp</td><td style="color: #2d7d5a;">입력된 outage start/end (${incStr || '없음'})</td></tr>
+      <tr><td>external_connectivity_loss_log</td><td style="color: #2d7d5a;">${esc(input.logs || '미입력')}</td></tr>
+    </table>
+    <div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">SUFFICIENT는 MVP 최소 기준 충족을 의미해요. Google의 최종 증빙 승인이나 credit 승인을 의미하지 않아요.</div>
+  `;
+  
+  // 섹션 4: 확인 필요 항목
+  document.getElementById('section-4-body').innerHTML = `
+    <table class="claim-table">
+      <tr><td>청구 기한 기준 확인</td><td style="color: var(--color-text-secondary);">SLA 본문(eligible 시점부터 60일) vs 공식 제출 폼(해당 월 종료 후 60일) 표현 차이 확인 필요</td></tr>
+      <tr><td>billing basis 확인</td><td style="color: var(--color-text-secondary);">예상 금액은 billing basis 확인 전까지 잠정값</td></tr>
+      <tr><td>리전 확인</td><td style="color: var(--color-text-secondary);">region 미확인 시 재확인</td></tr>
+      <tr><td>최대 cap 해석</td><td style="color: var(--color-text-secondary);">공식 규칙 범위 내, billing basis에 따라 확정</td></tr>
+    </table>
+    <div class="warning-box" style="margin-top: 8px;">이 Pack은 청구 검토 준비를 정리한 자료예요. 실제 지원 신청·통지·검토·승인·지급을 대신하지 않아요.</div>
+  `;
+  
+  // 섹션 5: 제출 정보 + Support 문의 초안
+  document.getElementById('section-5-body').innerHTML = `
+    <table class="claim-table">
+      <tr><td>covered_service</td><td>Single Instance</td></tr>
+      <tr><td>instance_id</td><td>${esc(ext.instance_id)}</td></tr>
+      <tr><td>project_id</td><td>${esc(ext.project_id)}</td></tr>
+      <tr><td>region</td><td>${esc(ext.region)}</td></tr>
+      <tr><td>network_tier</td><td>${esc(ext.network_tier)}</td></tr>
+      <tr><td>outage_date_time</td><td>${incStr || '입력된 outage start/end'}</td></tr>
+      <tr><td>outage_logs</td><td>${esc(input.logs || '미입력')}</td></tr>
+      <tr><td>case_id</td><td>${esc(input.case_id)}</td></tr>
+      <tr><td>google_incident_link</td><td>${esc(input.google_incident_link)}</td></tr>
+    </table>
+    <div class="disclaimer">실제 제출은 사용자가 수행합니다. 실제 승인/지급을 보장하지 않으며, 법률 자문이 아닙니다.</div>
+    <hr style="border: none; border-top: 1px solid var(--color-border-default); margin: 12px 0;">
+    <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--color-text-primary);">✉️ Support 문의 초안 (제출 전 초안, 사람 검토 필요)</h3>
+    <div style="background: #f8fafc; border: 1px solid var(--color-border-default); border-radius: 6px; padding: 12px; font-size: 12px; white-space: pre-wrap; color: var(--color-text-primary); line-height: 1.6;">
+Subject: SLA Credit Request — ${esc(ext.project_id)} / Instance ${esc(ext.instance_id)} / ${r.monthLabel}
+
+안녕하세요, ${esc(ext.project_id)} 프로젝트의 SLA 크레딧 요청을 드립니다.
+
+■ 장애 개요
+- 프로젝트: ${esc(ext.project_id)}
+- 인스턴스 ID: ${esc(ext.instance_id)}
+- 리전: ${esc(ext.region)}
+- 네트워크 등급: ${esc(ext.network_tier)}
+- 장애 유형: ${esc(ext.outage_type)}
+- 폐쇄 월: ${r.monthLabel}
+- 장애 구간 (union 후): ${incStr || '없음'}
+
+■ 계산 결과 (사전 검토용)
+- 월 총 분: ${r.totalMinutes} 분
+- 전체 장애: ${r.grossOutage} 분 / 검증된 제외: ${r.excluded} 분 / 적격 장애: ${r.eligible} 분
+- 월 가동률(MUP): 실제 ${r.rawMup !== null ? r.rawMup.toFixed(4) : '—'}% / 표시 ${r.displayMup !== null ? r.displayMup : '—'}%
+- SLO 99.90% 대비: ${r.breached === true ? '위반(Breach)' : (r.breached === false ? '위반 없음' : '계산 불가')}
+- 크레딧 등급: ${r.breached && r.tier ? `${r.tier.percent}% (${r.tier.range})` : '—'}
+
+■ 증빙 자료
+- Cloud Logging: ${esc(input.logs || '첨부 예정')}
+- 지원 케이스: ${esc(input.case_id)}
+- Google Incident: ${esc(input.google_incident_link)}
+
+■ 요청
+위 내용에 따라 SLA 크레딧 검토를 요청드립니다. 필요 시 추가 증빙을 제공하겠습니다.
+
+참고: 이 초안은 사전 검토용 예시이며, 실제 제출 전 사람이 최종 확인해야 합니다.
+    </div>
+    <div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">위 초안은 입력된 정보를 바탕으로 자동 생성된 참고용이에요. 실제 보내기 전에 사람이 수정해야 해요.</div>
+    <button class="copy-btn" style="margin-top: 8px;" onclick="copySection(5)">이 섹션 복사</button>
+  `;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+function copySection(num) {
+  const pack = {
+    summary: {
+      month: document.getElementById('hero-month').textContent.replace('분석 대상: ', '').split(' · ')[0],
+      project_id: document.getElementById('field-project_id')?.value || '',
+      instance_id: document.getElementById('field-instance_id')?.value || '',
+      region: document.getElementById('field-region')?.value || '',
+      nic: document.getElementById('field-nic')?.value || '',
+      network_tier: document.getElementById('field-network_tier')?.value || '',
+      series: document.getElementById('field-series')?.value || '',
+      provisioning: document.getElementById('field-provisioning')?.value || '',
+      outage_type: document.getElementById('field-outage_type')?.value || '',
+    },
+    sla_analysis: {
+      slo_percent: 99.9,
+      total_month_minutes: parseInt(document.getElementById('calc-total-min').textContent),
+      gross_outage_minutes: parseInt(document.getElementById('calc-gross').textContent),
+      verified_exclusion_minutes: parseInt(document.getElementById('calc-excluded').textContent),
+      eligible_outage_minutes: parseInt(document.getElementById('calc-eligible').textContent),
+      unrounded_mup_percent: parseFloat(document.getElementById('calc-mup-raw').textContent) || null,
+      mup_display_percent: parseFloat(document.getElementById('calc-mup-display').textContent) || null,
+      slo_breached: document.getElementById('calc-breach').textContent === 'SLA 위반 발생',
+      credit_tier: {
+        percent: parseInt(document.getElementById('credit-percent').textContent) || 0,
+        range: document.getElementById('credit-range').textContent,
+      },
+    },
+    evidence_checklist: {
+      status: document.getElementById('badge-evidence').textContent,
+      items: {
+        numeric_instance_id: document.getElementById('field-instance_id')?.value || '',
+        project_id: document.getElementById('field-project_id')?.value || '',
+        outage_timestamp: document.getElementById('calc-incidents').textContent,
+        external_connectivity_loss_log: document.getElementById('logs')?.value || '',
+      },
+    },
+    claim_readiness: {
+      status: document.getElementById('badge-readiness').textContent,
+      reason: '청구 검토 준비 상태',
+    },
+    form_draft: {
+      covered_service: 'Single Instance',
+      instance_id: document.getElementById('field-instance_id')?.value || '',
+      project_id: document.getElementById('field-project_id')?.value || '',
+      region: document.getElementById('field-region')?.value || '',
+      network_tier: document.getElementById('field-network_tier')?.value || '',
+      outage_date_time: document.getElementById('calc-incidents').textContent,
+      outage_logs: document.getElementById('logs')?.value || '',
+      case_id: 'support-case-12345',
+      google_incident_link: 'https://status.cloud.google.com/incidents/sample',
+    },
+  };
+  const text = JSON.stringify(pack, null, 2);
+  navigator.clipboard.writeText(text).then(() => {
+    const btns = document.querySelectorAll('.copy-btn');
+    btns.forEach(b => {
+      if (b.textContent.includes('복사') || b.textContent.includes('✓')) {
+        const orig = b.textContent;
+        b.textContent = '복사 완료 ✓';
+        setTimeout(() => b.textContent = orig, 2000);
+      }
+    });
+  }).catch(() => alert('복사에 실패했어요.'));
+}
+
+// ── 초기화 ──
+(function init() {
+  const input = getInput();
+  const r = compute(input);
+  render(input, r);
+})();
+
+// ── 버튼 연결 ──
+document.getElementById('btn-reanalyze').addEventListener('click', () => {
+  location.reload();
+});
+document.getElementById('btn-back-input').addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+</script>
+</body>
+</html>
