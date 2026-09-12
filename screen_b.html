@@ -198,7 +198,6 @@ function parseDateToUTC(dateStr) {
   var s = String(dateStr).trim();
   if (!s) return null;
   
-  // Z 제거 (UTC 표시)
   var working = s;
   var offsetMinutes = 0;
   
@@ -346,7 +345,6 @@ function getStoredInput() {
     console.warn('[SLA B] sessionStorage 파싱 오류:', e);
   }
   
-  // 세션 없으면 기본값 (데모용 - Scenario A)
   return {
     year: 2025, month: 7,
     incidents: [
@@ -454,20 +452,8 @@ function toggleSection(header) {
   if (body) body.classList.toggle('open');
 }
 
-// ── 초기화 & 렌더링 ──
-function init() {
-  var input = getStoredInput();
-  console.log('[SLA B] 입력 데이터:', input);
-  
-  var r = computeFromInput(input);
-  console.log('[SLA B] 계산 결과:', r);
-  
-  if (r.error) {
-    el('error-area').style.display = 'block';
-    el('error-msg').textContent = r.error + '\n\n입력 화면으로 돌아가서 다시 시도해주세요.';
-    return;
-  }
-  
+// ── 페이지 렌더링 ──
+function renderPage(input, r) {
   var ext = input.extract || {};
   
   // Hero
@@ -652,10 +638,59 @@ function init() {
   sec5 += '참고: 이 초안은 사전 검토용 예시이며, 실제 제출 전 사람이 최종 확인해야 합니다.';
   sec5 += '</div>';
   sec5 += '<div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">위 초안은 입력된 정보를 바탕으로 자동 생성된 참고용이에요. 실제 보내기 전에 사람이 수정해야 해요.</div>';
-  sec5 += '<button id="copy-btn" class="copy-btn" style="margin-top: 8px;" onclick="copySection(5)">이 섹션 복사</button>';
+  sec5 += '<button id="copy-btn" class="copy-btn" style="margin-top: 8px;" onclick="copySection()">이 섹션 복사</button>';
   el('section-5-body').innerHTML = sec5;
   
-  // UI 보이기
+  // ── copy-btn 이벤트 리스너 (버튼 생성된 후에 등록) ──
+  var copyBtn = el('copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      var pack = {
+        summary: {
+          month: el('hero-month').textContent.replace('분석 대상: ', '').split(' · ')[0],
+          project_id: (el('section-1-body').querySelector('tr:nth-child(2) td:last-child') || {}).textContent || '',
+        },
+        sla_analysis: {
+          slo_percent: 99.9,
+          total_month_minutes: parseInt(el('calc-total-min').textContent) || 0,
+          gross_outage_minutes: parseInt(el('calc-gross').textContent) || 0,
+          verified_exclusion_minutes: parseInt(el('calc-excluded').textContent) || 0,
+          eligible_outage_minutes: parseInt(el('calc-eligible').textContent) || 0,
+          unrounded_mup_percent: parseFloat(el('calc-mup-raw').textContent) || null,
+          mup_display_percent: parseFloat(el('calc-mup-display').textContent) || null,
+          slo_breached: el('calc-breach').textContent === 'SLA 위반 발생',
+          credit_tier: {
+            percent: parseInt(el('credit-percent').textContent) || 0,
+            range: el('credit-range').textContent,
+          },
+        },
+        evidence_checklist: {
+          status: el('badge-evidence').textContent,
+        },
+        claim_readiness: {
+          status: el('badge-readiness').textContent,
+          reason: '청구 검토 준비 상태',
+        },
+        form_draft: {
+          covered_service: 'Single Instance',
+          case_id: 'support-case-12345',
+          google_incident_link: 'https://status.cloud.google.com/incidents/sample',
+        },
+      };
+      try {
+        var text = JSON.stringify(pack, null, 2);
+        navigator.clipboard.writeText(text).then(function() {
+          alert('Claim Pack JSON을 클립보드에 복사했습니다.');
+        }).catch(function() {
+          alert('복사에 실패했어요.');
+        });
+      } catch (e) {
+        alert('복사 중 오류가 발생했어요: ' + e.message);
+      }
+    }
+  }
+  
+  // ── UI 보이기 ──
   el('cards-area').style.display = '';
   el('calc-section').style.display = '';
   el('claim-pack-area').style.display = '';
@@ -664,7 +699,24 @@ function init() {
   el('error-area').style.display = 'none';
 }
 
-// ── 버튼 연결 ──
+// ── 초기화 ──
+function init() {
+  var input = getStoredInput();
+  console.log('[SLA B] 입력 데이터:', input);
+  
+  var r = computeFromInput(input);
+  console.log('[SLA B] 계산 결과:', r);
+  
+  if (r.error) {
+    el('error-area').style.display = 'block';
+    el('error-msg').textContent = r.error + '\n\n입력 화면으로 돌아가서 다시 시도해주세요.';
+    return;
+  }
+  
+  renderPage(input, r);
+}
+
+// ── 버튼 연결 (static 요소들) ──
 el('btn-reanalyze').addEventListener('click', function() {
   window.location.href = 'index.html';
 });
@@ -673,51 +725,6 @@ el('btn-back-input').addEventListener('click', function() {
 });
 el('btn-back-error').addEventListener('click', function() {
   window.location.href = 'index.html';
-});
-el('copy-btn').addEventListener('click', function() {
-  // claim pack 전체를 클립보드로
-  var pack = {
-    summary: {
-      month: el('hero-month').textContent.replace('분석 대상: ', '').split(' · ')[0],
-      project_id: (el('section-1-body').querySelector('tr:nth-child(2) td:last-child') || {}).textContent || '',
-    },
-    sla_analysis: {
-      slo_percent: 99.9,
-      total_month_minutes: parseInt(el('calc-total-min').textContent) || 0,
-      gross_outage_minutes: parseInt(el('calc-gross').textContent) || 0,
-      verified_exclusion_minutes: parseInt(el('calc-excluded').textContent) || 0,
-      eligible_outage_minutes: parseInt(el('calc-eligible').textContent) || 0,
-      unrounded_mup_percent: parseFloat(el('calc-mup-raw').textContent) || null,
-      mup_display_percent: parseFloat(el('calc-mup-display').textContent) || null,
-      slo_breached: el('calc-breach').textContent === 'SLA 위반 발생',
-      credit_tier: {
-        percent: parseInt(el('credit-percent').textContent) || 0,
-        range: el('credit-range').textContent,
-      },
-    },
-    evidence_checklist: {
-      status: el('badge-evidence').textContent,
-    },
-    claim_readiness: {
-      status: el('badge-readiness').textContent,
-      reason: '청구 검토 준비 상태',
-    },
-    form_draft: {
-      covered_service: 'Single Instance',
-      case_id: 'support-case-12345',
-      google_incident_link: 'https://status.cloud.google.com/incidents/sample',
-    },
-  };
-  try {
-    var text = JSON.stringify(pack, null, 2);
-    navigator.clipboard.writeText(text).then(function() {
-      alert('Claim Pack JSON을 클립보드에 복사했습니다.');
-    }).catch(function() {
-      alert('복사에 실패했어요.');
-    });
-  } catch (e) {
-    alert('복사 중 오류가 발생했어요: ' + e.message);
-  }
 });
 
 // ── 실행 ──
