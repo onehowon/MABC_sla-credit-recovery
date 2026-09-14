@@ -76,15 +76,15 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 .frozen-note strong { color: var(--color-text-primary); }
 .scope-banner { background: rgba(192, 57, 43, 0.06); border: 1px solid rgba(192, 57, 43, 0.15); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-5); color: #c0392b; }
 .scope-banner strong { display: block; margin-bottom: var(--space-2); }
-.steps { display:flex; gap:8px; margin:0 0 var(--space-5); }.step { flex:1; color:#8090a4; font-size:var(--font-size-sm); }.step b{display:inline-grid;place-items:center;width:23px;height:23px;border-radius:50%;margin-right:5px;background:#e7edf5;color:#66758a;font-size:12px}.step.active{color:var(--color-surface-strong);font-weight:700}.step.active b{background:var(--color-surface-strong);color:#fff}.clip-notice{display:none;background:#fff8e8;border-left:3px solid #d08a00;border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:var(--space-4);margin:0 0 var(--space-5);color:#6d4a00}.money-hero{font-size:30px;font-weight:750;color:var(--color-surface-strong);line-height:1.1}.money-sub{font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-top:4px}.claim-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 var(--space-4)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #574cf7;outline-offset:2px}@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.steps { display:flex; gap:8px; margin:0 0 var(--space-5); }.step { flex:1; color:#8090a4; font-size:var(--font-size-sm); }.step b{display:inline-grid;place-items:center;width:23px;height:23px;border-radius:50%;margin-right:5px;background:#e7edf5;color:#66758a;font-size:12px}.step.done{color:var(--color-text-secondary);font-weight:500}.step.done b{background:#cfd8e6;color:#4e5b6b}.step.active{color:var(--color-surface-strong);font-weight:700}.step.active b{background:var(--color-surface-strong);color:#fff}.clip-notice{display:none;background:#fff8e8;border-left:3px solid #d08a00;border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:var(--space-4);margin:0 0 var(--space-5);color:#6d4a00}.money-hero{font-size:30px;font-weight:750;color:var(--color-surface-strong);line-height:1.1}.money-sub{font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-top:4px}.claim-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 var(--space-4)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #574cf7;outline-offset:2px}@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
 @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a class="back-link" href="index.html">입력 수정</a>
+  <a class="back-link" href="index.html">입력 수정하기</a>
   <span class="demo-badge">데모 모드 · 목업 인스턴스 기반 계산</span>
-  <nav class="steps" aria-label="진행 단계"><div class="step"><b>1</b>장애 기록</div><div class="step active"><b>2</b>결과 확인</div><div class="step" id="step-3"><b>3</b>청구 자료</div></nav>
+  <nav class="steps" aria-label="진행 단계"><div class="step done"><b>1</b>장애 기록</div><div class="step active"><b>2</b>결과 확인</div><div class="step" id="step-3"><b>3</b>청구 자료</div></nav>
 
   <div id="scope-banner" style="display:none;" class="scope-banner">
     <strong>⚠️ 범위 확인 필요</strong>
@@ -202,7 +202,6 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
   <div id="error-area" style="display:none; margin-top: var(--space-5); padding: var(--space-4); background: rgba(192, 57, 43, 0.08); border: 1px solid rgba(192, 57, 43, 0.2); border-radius: var(--radius-md); color: #c0392b; font-size: var(--font-size-sm);">
     <strong>⚠️ 오류</strong>
     <div id="error-msg"></div>
-    <button class="btn btn-ghost" id="btn-back-error" style="margin-top: var(--space-3);">입력 화면으로 돌아가기</button>
   </div>
 </div>
 
@@ -646,7 +645,7 @@ function renderPage(input, r) {
   if (r.noEligibleWindow) {
     nextTitle.textContent = '대상 월 또는 장애 시각을 수정해 주세요.';
     nextDescription.textContent = '입력한 장애 기록은 사라지지 않았지만, 선택한 대상 월에는 포함되지 않아 SLA 판정을 보류했습니다.';
-    nextButtons.innerHTML = '<button class="btn" id="next-reanalyze">입력 수정</button>';
+    nextButtons.innerHTML = '<button class="btn" id="next-reanalyze">입력 수정하기</button>';
   } else if (r.breached === false) {
     nextTitle.textContent = '현재 입력 기준으로는 청구 대상이 아닙니다.';
     nextDescription.textContent = 'SLA 기준을 충족했어요. 장애 시간이나 대상 월을 수정해야 한다면 다시 분석할 수 있어요.';
@@ -699,7 +698,7 @@ function renderPage(input, r) {
   sec2 += '<tr><td>Breach 여부</td><td style="color: ' + breachColor + '; font-weight: 600;">' + breachText + '</td></tr>';
   sec2 += '<tr><td>크레딧 등급</td><td style="color: var(--color-surface-strong);">' + tierText + '</td></tr>';
   sec2 += '</table>';
-  el('section-2-body').innerHTML = sec2;
+  el('section-2-body').innerHTML = sec2 + '<p style="margin:8px 0 0;font-size:var(--font-size-sm);color:var(--color-text-secondary)">▎ 반올림 전 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—') + '가 99.90%' + (r.breached ? ' 미만이라 ' + (r.tier ? r.tier.percent + '% 크레딧 구간입니다.' : ' 크레딧 구간입니다.') : ' 이상이라 크레딧 대상이 아닙니다.') + '</p>';
   
   // 섹션 3: 증빙 체크리스트
   var sec3 = '<table class="claim-table">';
