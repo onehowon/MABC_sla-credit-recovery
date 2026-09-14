@@ -22,7 +22,7 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 .back-link { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-secondary); font-size: var(--font-size-sm); text-decoration: none; margin-bottom: var(--space-5); }
 .back-link:hover { color: var(--color-surface-strong); }
 .back-link::before { content: '←'; }
-.demo-badge { display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(90, 82, 255, 0.1); color: var(--color-surface-strong); border: 1px solid var(--color-surface-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-xl); font-size: var(--font-size-xs); font-weight: 500; margin-bottom: var(--space-4); }
+.demo-badge { display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(90, 82, 255, 0.1); color: #302890; border: 1px solid var(--color-surface-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-xl); font-size: var(--font-size-xs); font-weight: 600; margin-bottom: var(--space-4); }
 .demo-badge::before { content: ''; width: 8px; height: 8px; background: var(--color-surface-strong); border-radius: 50%; }
 .hero { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-5); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .hero h1 { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 var(--space-2); }
@@ -197,7 +197,6 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     <p style="margin:var(--space-3) 0 0;">이 결과는 입력된 장애 기록을 월 단위로 중복 제거해 계산합니다. 크레딧 등급은 반올림 전 가동률을 기준으로 판정하며, 실제 승인·금액·기한은 Google의 공식 검토가 필요합니다.</p>
   </details>
 
-  <div class="cta" id="cta-area" style="display:none;"><a class="btn" href="index.html">입력 수정</a></div>
 
   <div id="error-area" style="display:none; margin-top: var(--space-5); padding: var(--space-4); background: rgba(192, 57, 43, 0.08); border: 1px solid rgba(192, 57, 43, 0.2); border-radius: var(--radius-md); color: #c0392b; font-size: var(--font-size-sm);">
     <strong>⚠️ 오류</strong>
@@ -521,7 +520,7 @@ function renderPage(input, r) {
   // 계산 불가/미위반 시 청구 초안이나 복사 기능을 노출하면 안 된다.
   var hasClaimPack = r.breached === true;
   var needsEvidenceReview = r.readiness.status === 'NEEDS_REVIEW';
-  el('step-3').className = hasClaimPack ? 'step active' : 'step';
+  el('step-3').className = hasClaimPack ? 'step done' : 'step';
   var clipNotice = el('clip-notice');
   if (r.transformations.length > 0) {
     clipNotice.style.display = 'block';
@@ -856,7 +855,6 @@ function renderPage(input, r) {
     el('no-claim-notice').querySelector('p').textContent = '입력한 장애 구간이 대상 월과 겹치지 않아 집계는 0분입니다. 이는 SLA 기준을 충족했다는 뜻이 아닙니다. 대상 월 또는 UTC 시각을 수정해 다시 분석하세요.';
   }
   el('frozen-note').style.display = '';
-  el('cta-area').style.display = 'none';
   el('error-area').style.display = 'none';
 }
 
@@ -880,9 +878,6 @@ function init() {
 // ── 버튼 연결 (static 요소들) ──
 document.querySelectorAll('.claim-section-header').forEach(function (header) {
   header.addEventListener('click', function () { toggleSection(header); });
-});
-el('btn-back-error').addEventListener('click', function() {
-  window.location.href = 'index.html';
 });
 
 // ── 실행 ──
