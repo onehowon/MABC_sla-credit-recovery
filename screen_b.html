@@ -138,6 +138,11 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     </table>
   </div>
 
+  <div class="card" id="no-claim-notice" style="display:none; margin-bottom: var(--space-5);">
+    <h3>청구 자료를 생성하지 않았어요</h3>
+    <p style="margin:0; color:var(--color-text-secondary); font-size:var(--font-size-sm);">현재 입력 기준으로 SLA 위반이 확인되지 않아 크레딧 청구 대상이 아닙니다. 위 계산 근거를 확인하거나 입력 내용을 수정해 다시 분석할 수 있어요.</p>
+  </div>
+
   <div id="claim-pack-area" style="display:none;">
     <div style="font-size: var(--font-size-md); font-weight: 600; margin: var(--space-5) 0 var(--space-3); color: var(--color-text-primary);">📦 Claim Pack — 제출 준비 자료 (Frozen 5종)</div>
     <div class="claim-pack" style="margin-bottom: var(--space-6);">
@@ -455,6 +460,10 @@ function toggleSection(header) {
 // ── 페이지 렌더링 ──
 function renderPage(input, r) {
   var ext = input.extract || {};
+  // Claim Pack은 SLA 위반이 확인된 경우에만 생성한다.
+  // 계산 불가/미위반 시 청구 초안이나 복사 기능을 노출하면 안 된다.
+  var hasClaimPack = r.breached === true;
+  var needsEvidenceReview = r.readiness.status === 'NEEDS_REVIEW';
   
   // Hero
   el('hero-month').textContent = '분석 대상: ' + r.monthLabel + ' · ' + esc(ext.project_id) + ' 프로젝트';
@@ -542,6 +551,8 @@ function renderPage(input, r) {
   el('calc-tier').style.color = (r.breached && r.tier) ? 'var(--color-surface-strong)' : 'var(--color-text-secondary)';
   
   // ── Claim Pack 섹션 ──
+  // 청구 대상이 아닌 결과에는 이 아래의 청구용 데이터를 만들지 않는다.
+  if (hasClaimPack) {
   
   // 섹션 1: 장애 요약
   var sec1 = '<table class="claim-table">';
@@ -598,7 +609,11 @@ function renderPage(input, r) {
   var creditStr = (r.breached && r.tier) ? r.tier.percent + '% 크레딧 (' + r.tier.range + ')' : (r.breached === false ? '해당 없음 (99.90% 이상)' : '계산 불가');
   var breachStr = r.breached === true ? '위반 (Breach)' : (r.breached === false ? '위반 없음' : '계산 불가');
   
-  var sec5 = '<table class="claim-table">';
+  var sec5 = '';
+  if (needsEvidenceReview) {
+    sec5 += '<div class="warning-box" style="margin: 0 0 12px;"><strong>제출 준비 미완료</strong><br>' + esc(r.readiness.reason) + ' 증빙을 보완하기 전에는 아래 초안을 제출하지 마세요.</div>';
+  }
+  sec5 += '<table class="claim-table">';
   sec5 += '<tr><td>covered_service</td><td>Single Instance</td></tr>';
   sec5 += '<tr><td>instance_id</td><td>' + esc(ext.instance_id) + '</td></tr>';
   sec5 += '<tr><td>project_id</td><td>' + esc(ext.project_id) + '</td></tr>';
@@ -613,7 +628,8 @@ function renderPage(input, r) {
   sec5 += '<hr style="border: none; border-top: 1px solid var(--color-border-default); margin: 12px 0;">';
   sec5 += '<h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--color-text-primary);">✉️ Support 문의 초안 (제출 전 초안, 사람 검토 필요)</h3>';
   sec5 += '<div style="background: #f8fafc; border: 1px solid var(--color-border-default); border-radius: 6px; padding: 12px; font-size: 12px; white-space: pre-wrap; color: var(--color-text-primary); line-height: 1.6;">';
-  sec5 += 'Subject: SLA Credit Request — ' + esc(ext.project_id) + ' / Instance ' + esc(ext.instance_id) + ' / ' + r.monthLabel + '\n\n';
+  sec5 += 'Subject: ' + (needsEvidenceReview ? '[검토 필요] ' : '') + 'SLA Credit Request — ' + esc(ext.project_id) + ' / Instance ' + esc(ext.instance_id) + ' / ' + r.monthLabel + '\n\n';
+  if (needsEvidenceReview) sec5 += '※ 제출 준비 미완료: ' + esc(r.readiness.reason) + ' 증빙 보완 전 검토용 초안입니다.\n\n';
   sec5 += '안녕하세요, ' + esc(ext.project_id) + ' 프로젝트의 SLA 크레딧 요청을 드립니다.\n\n';
   sec5 += '■ 장애 개요\n';
   sec5 += '- 프로젝트: ' + esc(ext.project_id) + '\n';
@@ -643,7 +659,7 @@ function renderPage(input, r) {
   
   // ── copy-btn 이벤트 리스너 (버튼 생성된 후에 등록) ──
   var copyBtn = el('copy-btn');
-  if (copyBtn) {
+  if (hasClaimPack && copyBtn) {
     copyBtn.addEventListener('click', function() {
       var pack = {
         summary: {
@@ -689,11 +705,13 @@ function renderPage(input, r) {
       }
     });
   }
+  }
   
   // ── UI 보이기 ──
   el('cards-area').style.display = '';
   el('calc-section').style.display = '';
-  el('claim-pack-area').style.display = '';
+  el('claim-pack-area').style.display = hasClaimPack ? '' : 'none';
+  el('no-claim-notice').style.display = hasClaimPack ? 'none' : '';
   el('frozen-note').style.display = '';
   el('cta-area').style.display = '';
   el('error-area').style.display = 'none';
