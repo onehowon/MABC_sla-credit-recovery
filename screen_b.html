@@ -18,7 +18,7 @@
 }
 * { box-sizing: border-box; color: var(--color-text-primary); font-family: var(--font-family); font-size: var(--font-base); line-height: var(--font-line-height); }
 body { background: var(--color-surface-raised); margin: 0; padding: var(--space-6); }
-.wrap { max-width: 800px; margin: 0 auto; }
+.wrap { max-width: 1120px; margin: 0 auto; }
 .back-link { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-secondary); font-size: var(--font-size-sm); text-decoration: none; margin-bottom: var(--space-5); }
 .back-link:hover { color: var(--color-surface-strong); }
 .back-link::before { content: '←'; }
@@ -56,12 +56,9 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 .claim-pack { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--space-5); }
 .claim-section { border-bottom: 1px solid var(--color-border-default); }
 .claim-section:last-child { border-bottom: none; }
-.claim-section-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) var(--space-5); background: rgba(90, 82, 255, 0.04); cursor: pointer; }
+.claim-section-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) var(--space-5); background: rgba(90, 82, 255, 0.04); }
 .claim-section-header h3 { font-size: var(--font-size-sm); font-weight: 600; margin: 0; color: var(--color-text-primary); }
-.claim-section-header .toggle-icon { transition: transform var(--motion-fast); font-size: var(--font-size-sm); }
-.claim-section-header.open .toggle-icon { transform: rotate(180deg); }
-.claim-section-body { padding: var(--space-4) var(--space-5); display: none; }
-.claim-section-body.open { display: block; }
+.claim-section-body { padding: var(--space-4) var(--space-5); display: block; }
 .claim-table { width: 100%; border-collapse: collapse; }
 .claim-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-default); font-size: var(--font-size-sm); vertical-align: top; }
 .claim-table td:first-child { color: var(--color-text-secondary); width: 35%; }
@@ -78,18 +75,21 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 .frozen-note strong { color: var(--color-text-primary); }
 .scope-banner { background: rgba(192, 57, 43, 0.06); border: 1px solid rgba(192, 57, 43, 0.15); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-5); color: #c0392b; }
 .scope-banner strong { display: block; margin-bottom: var(--space-2); }
+.steps { display:flex; gap:8px; margin:0 0 var(--space-5); }.step { flex:1; color:#8090a4; font-size:var(--font-size-sm); }.step b{display:inline-grid;place-items:center;width:23px;height:23px;border-radius:50%;margin-right:5px;background:#e7edf5;color:#66758a;font-size:12px}.step.active{color:var(--color-surface-strong);font-weight:700}.step.active b{background:var(--color-surface-strong);color:#fff}.clip-notice{display:none;background:#fff8e8;border-left:3px solid #d08a00;border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:var(--space-4);margin:0 0 var(--space-5);color:#6d4a00}.money-hero{font-size:30px;font-weight:750;color:var(--color-surface-strong);line-height:1.1}.money-sub{font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-top:4px}.claim-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 var(--space-4)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #c8c4ff;outline-offset:2px}@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important}}
 @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a class="back-link" href="index.html">입력 화면으로 돌아가기</a>
-  <span class="demo-badge">데모 모드 — Google Cloud 실시간 연동 없이 샘플 데이터 기반 계산</span>
+  <a class="back-link" href="index.html">입력 수정</a>
+  <span class="demo-badge">데모 모드 · 목업 인스턴스 기반 계산</span>
+  <nav class="steps" aria-label="진행 단계"><div class="step"><b>1</b>장애 기록</div><div class="step active"><b>2</b>결과 확인</div><div class="step active"><b>3</b>청구 자료</div></nav>
 
   <div id="scope-banner" style="display:none;" class="scope-banner">
     <strong>⚠️ 범위 확인 필요</strong>
     <span id="scope-msg"></span>
   </div>
+  <div id="clip-notice" class="clip-notice" role="status"></div>
 
   <div class="hero" id="hero">
     <p class="month-label" id="hero-month">분석 대상: —</p>
@@ -120,7 +120,7 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     </div>
     <div class="card">
       <h3>이번 장애의 결과</h3>
-      <div class="status-row"><span class="k">크레딧 비율</span><span class="v" id="credit-percent" style="color: var(--color-surface-strong); font-size: var(--font-size-lg);">—</span></div>
+      <div class="money-hero" id="credit-percent">—</div><div class="money-sub" id="credit-amount">월 이용요금을 입력하면 잠정 금액을 보여드려요.</div>
       <div class="status-row"><span class="k">월 가동률</span><span class="v" id="summary-mup">—</span></div>
       <div class="status-row"><span class="k">집계된 장애 시간</span><span class="v" id="summary-outage">—</span></div>
     </div>
@@ -156,34 +156,35 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 
   <div id="claim-pack-area" style="display:none;">
     <div style="font-size: var(--font-size-md); font-weight: 600; margin: var(--space-5) 0 var(--space-3); color: var(--color-text-primary);">청구 자료 초안</div>
+    <div class="claim-actions"><button class="btn" id="copy-all">전체 복사</button><button class="btn btn-ghost" id="download-md">Markdown 다운로드</button></div>
     <div class="claim-pack" style="margin-bottom: var(--space-6);">
       <div class="claim-section">
-        <div class="claim-section-header" onclick="toggleSection(this)">
-          <h3>1. 장애와 대상 리소스 <span class="toggle-icon">▼</span></h3>
+        <div class="claim-section-header">
+          <h3>1. 장애와 대상 리소스</h3>
         </div>
         <div class="claim-section-body" id="section-1-body"></div>
       </div>
       <div class="claim-section">
-        <div class="claim-section-header" onclick="toggleSection(this)">
-          <h3>2. 가동률 계산 내역 <span class="toggle-icon">▼</span></h3>
+        <div class="claim-section-header">
+          <h3>2. 가동률 계산 내역</h3>
         </div>
         <div class="claim-section-body" id="section-2-body"></div>
       </div>
       <div class="claim-section">
-        <div class="claim-section-header" onclick="toggleSection(this)">
-          <h3>3. 증빙 자료 확인 <span class="toggle-icon">▼</span></h3>
+        <div class="claim-section-header">
+          <h3>3. 증빙 자료 확인</h3>
         </div>
         <div class="claim-section-body" id="section-3-body"></div>
       </div>
       <div class="claim-section">
-        <div class="claim-section-header" onclick="toggleSection(this)">
-          <h3>4. 제출 전 확인할 것 <span class="toggle-icon">▼</span></h3>
+        <div class="claim-section-header">
+          <h3>4. 제출 전 확인할 것</h3>
         </div>
         <div class="claim-section-body" id="section-4-body"></div>
       </div>
       <div class="claim-section">
-        <div class="claim-section-header" onclick="toggleSection(this)">
-          <h3>5. Support 문의 초안 <span class="toggle-icon">▼</span></h3>
+        <div class="claim-section-header">
+          <h3>5. Support 문의 초안</h3>
         </div>
         <div class="claim-section-body" id="section-5-body"></div>
       </div>
@@ -195,10 +196,7 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
     <p style="margin:var(--space-3) 0 0;">이 결과는 입력된 장애 기록을 월 단위로 중복 제거해 계산합니다. 크레딧 등급은 반올림 전 가동률을 기준으로 판정하며, 실제 승인·금액·기한은 Google의 공식 검토가 필요합니다.</p>
   </details>
 
-  <div class="cta" id="cta-area" style="display:none;">
-    <button class="btn" id="btn-reanalyze">분석 다시 하기</button>
-    <button class="btn btn-ghost" id="btn-back-input">입력 화면으로</button>
-  </div>
+  <div class="cta" id="cta-area" style="display:none;"><a class="btn" href="index.html">입력 수정</a></div>
 
   <div id="error-area" style="display:none; margin-top: var(--space-5); padding: var(--space-4); background: rgba(192, 57, 43, 0.08); border: 1px solid rgba(192, 57, 43, 0.2); border-radius: var(--radius-md); color: #c0392b; font-size: var(--font-size-sm);">
     <strong>⚠️ 오류</strong>
@@ -398,6 +396,9 @@ function computeFromInput(input) {
   var bounds = monthBounds(year, month);
   
   var parsed = [];
+  var inputMinutes = 0;
+  var outsideMinutes = 0;
+  var outsideCount = 0;
   for (var k = 0; k < input.incidents.length; k++) {
     var it = input.incidents[k];
     var s = parseDateToUTC(it.start);
@@ -406,8 +407,10 @@ function computeFromInput(input) {
     var sMs = dateToUTCms(s);
     var eMs = dateToUTCms(e);
     if (sMs === null || eMs === null) continue;
+    inputMinutes += Math.max(0, Math.round((eMs - sMs) / 60000));
     var c = clip(sMs, eMs, bounds.start, bounds.end);
     if (c) parsed.push(c);
+    else { outsideCount += 1; outsideMinutes += Math.max(0, Math.round((eMs - sMs) / 60000)); }
   }
   
   var unionInc = unionIntervals(parsed);
@@ -415,11 +418,15 @@ function computeFromInput(input) {
   var excluded = 0;
   var eligible = Math.max(gross - excluded, 0);
   var totalMin = bounds.totalMinutes;
-  var rawMup = totalMin > 0 ? (totalMin - eligible) / totalMin * 100 : null;
+  // 입력된 구간이 대상 월과 하나도 겹치지 않으면 "100%"가 아니라 판정 불가다.
+  var noEligibleWindow = input.incidents.length > 0 && parsed.length === 0;
+  var rawMup = !noEligibleWindow && totalMin > 0 ? (totalMin - eligible) / totalMin * 100 : null;
   var displayMup = rawMup !== null ? Math.round(rawMup * 100) / 100 : null;
-  var breached = rawMup !== null && rawMup < 99.9;
+  var breached = rawMup === null ? null : rawMup < 99.9;
   var tier = calcTier(rawMup);
-  var readiness = calcReadiness(breached, input.evidence_status || 'SUFFICIENT', input.billing_verified || false, input.deadline_blocker || false);
+  var readiness = noEligibleWindow
+    ? { status: 'NEEDS_REVIEW', label: '대상 월 확인 필요', reason: '입력한 장애 구간이 대상 월과 겹치지 않아 계산할 수 없음' }
+    : calcReadiness(breached, input.evidence_status || 'SUFFICIENT', input.billing_verified || false, input.deadline_blocker || false);
   
   return {
     monthLabel: year + '-' + (month < 10 ? '0' + month : '' + month),
@@ -429,6 +436,10 @@ function computeFromInput(input) {
     eligible: eligible,
     beforeUnion: input.incidents.length,
     afterUnion: unionInc.length,
+    inputMinutes: inputMinutes,
+    outsideMinutes: outsideMinutes,
+    outsideCount: outsideCount,
+    noEligibleWindow: noEligibleWindow,
     rawMup: rawMup,
     displayMup: displayMup,
     breached: breached,
@@ -476,34 +487,43 @@ function renderPage(input, r) {
   // 계산 불가/미위반 시 청구 초안이나 복사 기능을 노출하면 안 된다.
   var hasClaimPack = r.breached === true;
   var needsEvidenceReview = r.readiness.status === 'NEEDS_REVIEW';
+  var clipNotice = el('clip-notice');
+  if (r.outsideCount > 0) {
+    clipNotice.style.display = '';
+    clipNotice.innerHTML = '<strong>입력 구간 중 대상 월 밖의 시간이 제외되었습니다.</strong><br>입력 ' + r.inputMinutes + '분 → 대상 월(' + r.monthLabel + ') 밖 ' + r.outsideMinutes + '분 제외 → 집계 ' + r.eligible + '분. ' + (r.noEligibleWindow ? '계산할 구간이 없어 청구 가능 여부를 판정하지 않았습니다.' : '대상 월에 겹치는 구간만 계산했습니다.');
+  } else { clipNotice.style.display = 'none'; }
   
   // Hero
   el('hero-month').textContent = '분석 대상: ' + r.monthLabel + ' · ' + esc(ext.project_id) + ' 프로젝트';
-  el('hero-title').textContent = r.breached === true ? '이번 달 복구 기회' : '장애 분석 결과';
+  el('hero-title').textContent = r.breached === true ? '이번 달 복구 기회' : (r.noEligibleWindow ? '대상 월 확인이 필요해요' : '장애 분석 결과');
   
   var icon = el('hero-icon');
   var valueEl = el('hero-value');
   var subEl = el('hero-sub');
   
-  if (r.breached === false) {
-    icon.style.background = '#2d7d5a';
-    icon.textContent = '✓';
-    valueEl.textContent = 'SLA 위반 없음';
-    valueEl.style.color = '#2d7d5a';
+  if (r.noEligibleWindow) {
+    nextTitle.textContent = '대상 월 또는 장애 시각을 수정해 주세요.';
+    nextDescription.textContent = '입력한 장애 기록은 사라지지 않았지만, 선택한 대상 월에는 포함되지 않아 SLA 판정을 보류했습니다.';
+    nextButtons.innerHTML = '<button class="btn" id="next-reanalyze">입력 수정</button>';
+  } else if (r.breached === false) {
+    icon.style.background = '#65758b';
+    icon.textContent = '—';
+    valueEl.textContent = '현재 입력으로는 청구 대상이 아닙니다';
+    valueEl.style.color = '#48566a';
     subEl.textContent = '월 가동률 ' + (r.displayMup !== null ? r.displayMup + '%' : '—') + ' (실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '%) · 크레딧 미해당 (99.90% 이상)';
   } else if (r.breached === true) {
-    icon.style.background = '#c0392b';
-    icon.textContent = '!';
-    valueEl.textContent = 'SLA 위반 발생';
-    valueEl.style.color = '#c0392b';
+    icon.style.background = '#574cf7';
+    icon.textContent = '✓';
+    valueEl.textContent = (r.tier ? r.tier.percent + '% 크레딧 청구 검토 가능' : '크레딧 청구 검토 가능');
+    valueEl.style.color = '#574cf7';
     var tierStr = r.tier ? r.tier.percent + '% 크레딧 (' + r.tier.range + ')' : '크레딧 등급 없음';
     subEl.textContent = '월 가동률 ' + (r.displayMup !== null ? r.displayMup + '%' : '—') + ' (실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '%) · ' + tierStr;
   } else {
     icon.style.background = '#b8860b';
     icon.textContent = '?';
-    valueEl.textContent = '계산 불가';
+    valueEl.textContent = '계산할 구간이 없습니다';
     valueEl.style.color = '#b8860b';
-    subEl.textContent = '월 총 분 계산 불가 또는 장애 정보 부족';
+    subEl.textContent = '입력한 장애 구간이 대상 월과 겹치지 않습니다. 대상 월 또는 UTC 시각을 수정해 주세요.';
   }
   
   // 증빙 카드
@@ -511,7 +531,7 @@ function renderPage(input, r) {
   var rdBadge = el('badge-readiness');
   var resourceBadge = el('badge-resource');
   
-  var evStatus = input.evidence_status || 'SUFFICIENT';
+  var evStatus = r.noEligibleWindow ? 'UNDETERMINED' : (input.evidence_status || 'SUFFICIENT');
   var evColorMap = { SUFFICIENT: '#2d7d5a', INSUFFICIENT: '#c0392b', UNDETERMINED: '#b8860b' };
   var evLabelMap = { SUFFICIENT: '충분', INSUFFICIENT: '부족', UNDETERMINED: '확인 필요' };
   var evColor = evColorMap[evStatus] || '#65758b';
@@ -533,13 +553,17 @@ function renderPage(input, r) {
 
   // 사용자는 이 결과가 어떤 입력으로 만들어졌는지 먼저 알아야 한다.
   var isGcpSource = input.source === 'gcp-api';
-  el('analysis-source').textContent = isGcpSource ? 'GCP API 수집 기반' : '수동 기록 기반';
+  el('analysis-source').textContent = isGcpSource ? 'GCP API 수집 기반' : (input.source === 'demo-instance' ? '목업 인스턴스 기반' : '수동 기록 기반');
   el('opportunity-summary').textContent = r.breached === true
     ? (isGcpSource ? 'GCP에서 수집한 리소스 정보와 선택한 장애 구간을 바탕으로 기회를 찾았습니다. 로그 증거는 제출 전에 반드시 사람이 검토해야 합니다.' : '입력한 장애 기록과 리소스 정보를 바탕으로 크레딧 청구 가능성을 찾았습니다. 아래에서 증빙과 초안을 검토하세요.')
-    : '입력한 장애 기록을 현재 SLA 기준으로 계산했습니다. 청구 대상이 아니어도 계산 근거는 보관할 수 있어요.';
+    : (r.noEligibleWindow ? '대상 월에 포함되는 장애 구간이 없어 계산을 보류했습니다. 입력 기록을 수정한 뒤 다시 확인하세요.' : '입력한 장애 기록을 현재 SLA 기준으로 계산했습니다. 청구 대상이 아니어도 계산 근거는 보관할 수 있어요.');
   
   // 금액 카드
-  el('credit-percent').textContent = (r.breached && r.tier) ? r.tier.percent + '%' : '—';
+  el('credit-percent').textContent = (r.breached && r.tier) ? r.tier.percent + '% 크레딧' : '—';
+  var charge = Number(input.monthly_charge);
+  el('credit-amount').textContent = (r.breached && r.tier && isFinite(charge) && charge >= 0)
+    ? '약 $' + (charge * r.tier.percent / 100).toFixed(2) + ' 상당 · 이용요금 기준 잠정 추정'
+    : (r.breached ? '월 이용요금을 입력하면 잠정 금액을 보여드려요.' : '청구 가능성이 확인되면 금액을 잠정 추정할 수 있어요.');
   el('summary-mup').textContent = r.displayMup !== null ? r.displayMup + '%' : '—';
   el('summary-outage').textContent = r.eligible + '분';
   
@@ -564,7 +588,7 @@ function renderPage(input, r) {
   el('calc-mup-display').textContent = r.displayMup !== null ? r.displayMup + '%' : '—';
   
   var breachText = r.breached === true ? 'SLA 위반 발생' : (r.breached === false ? 'SLA 위반 없음 (≥ 99.90%)' : '계산 불가');
-  var breachColor = r.breached === true ? '#c0392b' : (r.breached === false ? '#2d7d5a' : '#b8860b');
+  var breachColor = r.breached === true ? '#574cf7' : (r.breached === false ? '#65758b' : '#b8860b');
   el('calc-breach').textContent = breachText;
   el('calc-breach').style.color = breachColor;
   
@@ -698,7 +722,7 @@ function renderPage(input, r) {
   sec5 += '참고: 이 초안은 사전 검토용 예시이며, 실제 제출 전 사람이 최종 확인해야 합니다.';
   sec5 += '</div>';
   sec5 += '<div style="margin-top: 8px; font-size: 11px; color: var(--color-text-secondary);">위 초안은 입력된 정보를 바탕으로 자동 생성된 참고용이에요. 실제 보내기 전에 사람이 수정해야 해요.</div>';
-  sec5 += '<button id="copy-btn" class="copy-btn" style="margin-top: 8px;" onclick="copySection()">이 섹션 복사</button>';
+  sec5 += '<button id="copy-btn" class="copy-btn" style="margin-top: 8px;">Support 초안 복사</button>';
   el('section-5-body').innerHTML = sec5;
   
   // ── copy-btn 이벤트 리스너 (버튼 생성된 후에 등록) ──
@@ -749,6 +773,19 @@ function renderPage(input, r) {
       }
     });
   }
+  var plainPack = function () {
+    return '# SLA Credit Claim Pack\n\n' + el('claim-pack-area').innerText.replace('전체 복사Markdown 다운로드', '').trim() + '\n\n※ 실제 제출 전 사람이 최종 확인해야 합니다.\n';
+  };
+  var copyAll = el('copy-all');
+  if (copyAll) copyAll.addEventListener('click', function () {
+    navigator.clipboard.writeText(plainPack()).then(function () { copyAll.textContent = '복사 완료'; setTimeout(function () { copyAll.textContent = '전체 복사'; }, 1600); }).catch(function () { alert('복사에 실패했어요.'); });
+  });
+  var download = el('download-md');
+  if (download) download.addEventListener('click', function () {
+    var blob = new Blob([plainPack()], { type: 'text/markdown;charset=utf-8' });
+    var url = URL.createObjectURL(blob), link = document.createElement('a');
+    link.href = url; link.download = 'sla-claim-pack-' + r.monthLabel + '.md'; link.click(); URL.revokeObjectURL(url);
+  });
   }
   
   // ── UI 보이기 ──
@@ -757,6 +794,10 @@ function renderPage(input, r) {
   el('calc-section').style.display = '';
   el('claim-pack-area').style.display = hasClaimPack ? '' : 'none';
   el('no-claim-notice').style.display = hasClaimPack ? 'none' : '';
+  if (r.noEligibleWindow) {
+    el('no-claim-notice').querySelector('h3').textContent = '청구 대상 여부를 판정하지 않았어요';
+    el('no-claim-notice').querySelector('p').textContent = '입력한 장애 구간이 대상 월과 겹치지 않아 집계는 0분입니다. 이는 SLA 기준을 충족했다는 뜻이 아닙니다. 대상 월 또는 UTC 시각을 수정해 다시 분석하세요.';
+  }
   el('frozen-note').style.display = '';
   el('cta-area').style.display = '';
   el('error-area').style.display = 'none';
@@ -780,12 +821,6 @@ function init() {
 }
 
 // ── 버튼 연결 (static 요소들) ──
-el('btn-reanalyze').addEventListener('click', function() {
-  window.location.href = 'index.html';
-});
-el('btn-back-input').addEventListener('click', function() {
-  window.location.href = 'index.html';
-});
 el('btn-back-error').addEventListener('click', function() {
   window.location.href = 'index.html';
 });
