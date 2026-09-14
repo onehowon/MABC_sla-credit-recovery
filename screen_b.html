@@ -135,7 +135,7 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
 
   <details class="calc-section" id="calc-section" style="display:none;">
     <summary style="cursor:pointer; font-size:var(--font-size-md); font-weight:600;">계산 근거 보기</summary>
-    <p style="font-size:var(--font-size-sm); color:var(--color-text-secondary); margin:var(--space-3) 0;">입력한 장애 시간을 기준으로 가동률을 계산한 상세 내역입니다.</p>
+    <p style="font-size:var(--font-size-sm); color:var(--color-text-secondary); margin:var(--space-3) 0;">입력한 장애 시간을 기준으로 가동률을 계산한 상세 내역입니다. <strong>표시값은 보기 쉽게 반올림하고, SLA 위반 판정은 반올림 전 실제값으로 합니다.</strong></p>
     <table class="calc-table">
       <tr><td>입력된 장애 구간 (union 후)</td><td id="calc-incidents">—</td></tr>
       <tr><td>월 총 분</td><td id="calc-total-min">—</td></tr>
@@ -407,10 +407,12 @@ function computeFromInput(input) {
     var sMs = dateToUTCms(s);
     var eMs = dateToUTCms(e);
     if (sMs === null || eMs === null) continue;
-    inputMinutes += Math.max(0, Math.round((eMs - sMs) / 60000));
+    var originalMinutes = Math.max(0, Math.round((eMs - sMs) / 60000));
+    inputMinutes += originalMinutes;
     var c = clip(sMs, eMs, bounds.start, bounds.end);
     if (c) parsed.push(c);
-    else { outsideCount += 1; outsideMinutes += Math.max(0, Math.round((eMs - sMs) / 60000)); }
+    var inMonthMinutes = c ? Math.max(0, Math.round((c.end - c.start) / 60000)) : 0;
+    if (inMonthMinutes < originalMinutes) { outsideCount += 1; outsideMinutes += originalMinutes - inMonthMinutes; }
   }
   
   var unionInc = unionIntervals(parsed);
