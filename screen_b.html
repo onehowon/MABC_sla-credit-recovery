@@ -269,8 +269,10 @@ function dateToUTCms(d) {
 // ── 월 계산 ──
 function monthBounds(year, month) {
   var start = Date.UTC(year, month - 1, 1, 0, 0, 0);
+  // 종료 경계는 그 달의 마지막 날 00:00이 아니라 다음 달 1일 00:00이다.
+  // 그래야 마지막 날의 모든 장애 구간을 올바르게 clip/split할 수 있다.
   var lastDay = new Date(Date.UTC(year, month, 0, 0, 0, 0)).getUTCDate();
-  var end = Date.UTC(year, month - 1, lastDay, 0, 0, 0);
+  var end = Date.UTC(year, month, 1, 0, 0, 0);
   return { start: start, end: end, totalMinutes: lastDay * 24 * 60 };
 }
 
@@ -504,9 +506,11 @@ function renderPage(input, r) {
   var subEl = el('hero-sub');
   
   if (r.noEligibleWindow) {
-    nextTitle.textContent = '대상 월 또는 장애 시각을 수정해 주세요.';
-    nextDescription.textContent = '입력한 장애 기록은 사라지지 않았지만, 선택한 대상 월에는 포함되지 않아 SLA 판정을 보류했습니다.';
-    nextButtons.innerHTML = '<button class="btn" id="next-reanalyze">입력 수정</button>';
+    icon.style.background = '#b8860b';
+    icon.textContent = '?';
+    valueEl.textContent = '계산할 구간이 없습니다';
+    valueEl.style.color = '#8a5b00';
+    subEl.textContent = '입력한 장애 구간이 대상 월과 겹치지 않습니다. 대상 월 또는 UTC 시각을 수정해 주세요.';
   } else if (r.breached === false) {
     icon.style.background = '#65758b';
     icon.textContent = '—';
@@ -602,7 +606,11 @@ function renderPage(input, r) {
   var nextTitle = el('next-action-title');
   var nextDescription = el('next-action-description');
   var nextButtons = el('next-action-buttons');
-  if (r.breached === false) {
+  if (r.noEligibleWindow) {
+    nextTitle.textContent = '대상 월 또는 장애 시각을 수정해 주세요.';
+    nextDescription.textContent = '입력한 장애 기록은 사라지지 않았지만, 선택한 대상 월에는 포함되지 않아 SLA 판정을 보류했습니다.';
+    nextButtons.innerHTML = '<button class="btn" id="next-reanalyze">입력 수정</button>';
+  } else if (r.breached === false) {
     nextTitle.textContent = '현재 입력 기준으로는 청구 대상이 아닙니다.';
     nextDescription.textContent = 'SLA 기준을 충족했어요. 장애 시간이나 대상 월을 수정해야 한다면 다시 분석할 수 있어요.';
     nextButtons.innerHTML = '<button class="btn" id="next-reanalyze">입력 수정하기</button>';
