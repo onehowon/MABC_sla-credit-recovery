@@ -55,13 +55,36 @@ function isoStartOfNextMonth(month) {
   return new Date(Date.UTC(year, value, 1)).toISOString().replace('.000Z', 'Z');
 }
 function tail(value = '') { return String(value).split('/').pop(); }
+function isClosedCalendarMonth(month) {
+  const end = new Date(isoStartOfNextMonth(month));
+  const currentMonthStart = new Date();
+  currentMonthStart.setUTCDate(1);
+  currentMonthStart.setUTCHours(0, 0, 0, 0);
+  return end <= currentMonthStart;
+}
+function scopeCandidate(instance, month) {
+  const reasons = [];
+  const family = String(instance.machineSeries || '').toUpperCase();
+  if (!family.startsWith('E2-')) reasons.push('E2 machine series가 아님');
+  if (instance.networkInterfaceCount !== 1) reasons.push('v1은 단일 NIC만 지원');
+  if (instance.scheduling.preemptible || instance.scheduling.provisioningModel === 'SPOT') reasons.push('Spot/Preemptible VM은 v1 SLA 대상이 아님');
+  if (instance.networkTiers.length !== 1 || instance.networkTiers[0] !== 'PREMIUM') reasons.push('Premium network tier를 단일하게 확인할 수 없음');
+  if (!isClosedCalendarMonth(month)) reasons.push('closed calendar month가 아님');
+  return {
+    executionStatus: reasons.length ? 'OUT_OF_SCOPE' : 'COMPLETE',
+    scope: reasons.length ? 'OUT_OF_SCOPE' : 'IN_SCOPE_CANDIDATE',
+    reasons,
+    note: reasons.length ? '이 결과에는 Premium/Single Instance/E2 규칙을 적용하지 마세요.' : '리소스 구성은 v1 자동 판정 범위 후보입니다. 외부 연결 손실 증거와 월 내 tier 변경 여부는 별도 확인이 필요합니다.',
+  };
+}
 function safeText(entry) {
   const text = entry.textPayload || entry.jsonPayload?.message || entry.protoPayload?.status?.message || '';
   return String(text).replace(/\s+/g, ' ').slice(0, 500);
 }
 
-async function listInstances({ projectId }) {
+async function listInstances({ projectId, month }) {
   assertProject(projectId);
+  if (month) isoStartOfMonth(month);
   let pageToken = '';
   const instances = [];
   do {
@@ -70,7 +93,7 @@ async function listInstances({ projectId }) {
     const data = await google(`https://compute.googleapis.com/compute/v1/projects/${encodeURIComponent(projectId)}/aggregated/instances?${query}`);
     for (const [scope, scoped] of Object.entries(data.items || {})) {
       for (const instance of scoped.instances || []) {
-        instances.push({
+        const instanceSummary = {
           id: instance.id,
           name: instance.name,
           zone: tail(instance.zone || scope),
@@ -79,7 +102,8 @@ async function listInstances({ projectId }) {
           networkInterfaceCount: (instance.networkInterfaces || []).length,
           networkTiers: [...new Set((instance.networkInterfaces || []).flatMap(nic => (nic.accessConfigs || []).map(ac => ac.networkTier).filter(Boolean)))],
           scheduling: { preemptible: Boolean(instance.scheduling?.preemptible), provisioningModel: instance.scheduling?.provisioningModel || 'STANDARD' },
-        });
+        };
+        instances.push({ ...instanceSummary, ...(month ? { scopeAssessment: scopeCandidate(instanceSummary, month) } : {}) });
       }
     }
     pageToken = data.nextPageToken || '';
@@ -113,9 +137,14 @@ async function findConnectivityEvidence({ projectId, instanceId, start, end, pag
 
 async function discoverMonthContext({ projectId, month }) {
   assertProject(projectId);
-  const inventory = await listInstances({ projectId });
+  isoStartOfMonth(month);
+  if (!isClosedCalendarMonth(month)) {
+    return { executionStatus: 'OUT_OF_SCOPE', projectId, month, reasons: ['v1은 closed calendar month만 자동 판정합니다.'], instances: [] };
+  }
+  const inventory = await listInstances({ projectId, month });
   return {
     ...inventory,
+    executionStatus: 'COMPLETE',
     month,
     queriedRange: { start: isoStartOfMonth(month), end: isoStartOfNextMonth(month) },
     nextStep: '대상 인스턴스를 하나 선택한 뒤 gcp_find_connectivity_evidence로 장애 후보 구간의 로그를 확인하세요. 로그만으로 적격 장애나 Google 귀책을 자동 확정하지 않습니다.',
@@ -123,7 +152,7 @@ async function discoverMonthContext({ projectId, month }) {
 }
 
 const tools = [
-  { name: 'gcp_list_gce_instances', description: '프로젝트의 GCE 인스턴스를 읽기 전용으로 조회한다. SLA v1 scope 후보(E2, Premium, single NIC)를 사람이 고를 수 있도록 메타데이터만 반환한다.', inputSchema: { type: 'object', properties: { projectId: { type: 'string', description: 'GCP project ID' } }, required: ['projectId'], additionalProperties: false } },
+  { name: 'gcp_list_gce_instances', description: '프로젝트의 GCE 인스턴스를 읽기 전용으로 조회한다. month를 제공하면 sla-credit-recovery v1(E2, Premium, single NIC, closed month, Spot 제외) scope 후보를 명시적으로 분류한다.', inputSchema: { type: 'object', properties: { projectId: { type: 'string', description: 'GCP project ID' }, month: { type: 'string', description: '선택: YYYY-MM. 제공 시 v1 scope 후보 판정' } }, required: ['projectId'], additionalProperties: false } },
   { name: 'gcp_find_connectivity_evidence', description: '선택한 GCE numeric instance ID와 시간 범위로 Cloud Logging 증거 후보를 읽기 전용으로 조회한다. 결과는 SLA 적격 장애의 자동 확정이 아니다.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, instanceId: { type: 'string' }, start: { type: 'string', description: 'RFC3339' }, end: { type: 'string', description: 'RFC3339' }, pageSize: { type: 'integer', minimum: 1, maximum: 100 } }, required: ['projectId', 'instanceId', 'start', 'end'], additionalProperties: false } },
   { name: 'gcp_discover_sla_month_context', description: '닫힌 calendar month와 프로젝트를 받아 GCE 인벤토리 및 다음 증거 수집 범위를 반환한다. 청구 가능 여부나 금액은 판정하지 않는다.', inputSchema: { type: 'object', properties: { projectId: { type: 'string' }, month: { type: 'string', description: 'YYYY-MM, closed calendar month' } }, required: ['projectId', 'month'], additionalProperties: false } },
 ];
