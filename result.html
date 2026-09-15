@@ -711,7 +711,7 @@ function renderPage(input, r) {
   sec2 += '<tr><td>적격 장애 (분)</td><td>' + r.eligible + ' 분</td></tr>';
   sec2 += '<tr><td>장애 구간 (union 전/후)</td><td>' + r.beforeUnion + ' / ' + r.afterUnion + '</td></tr>';
   sec2 += '<tr><td>월 가동률 (실제, unrounded)</td><td style="font-weight: 600;">' + (r.rawMup !== null ? r.rawMup.toFixed(4) + '%' : '—') + '</td></tr>';
-  sec2 += '<tr><td>월 가동률 (표시, rounded)</td><td>' + (r.displayMup !== null ? r.displayMup + '%' : '—') + '</td></tr>';
+  sec2 += '<tr><td>월 가동률 (표시, rounded)</td><td>' + (r.displayMup !== null ? formatMup(r.displayMup) : '—') + '</td></tr>';
   sec2 += '<tr><td>Breach 여부</td><td style="color: ' + breachColor + '; font-weight: 600;">' + breachText + '</td></tr>';
   sec2 += '<tr><td>크레딧 등급</td><td style="color: var(--color-surface-strong);">' + tierText + '</td></tr>';
   sec2 += '</table>';
@@ -777,7 +777,7 @@ function renderPage(input, r) {
   sec5 += '■ 계산 결과 (사전 검토용)\n';
   sec5 += '- 월 총 분: ' + r.totalMinutes + ' 분\n';
   sec5 += '- 전체 장애: ' + r.grossOutage + ' 분 / 검증된 제외: ' + r.excluded + ' 분 / 적격 장애: ' + r.eligible + ' 분\n';
-  sec5 += '- 월 가동률(MUP): 실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '% / 표시 ' + (r.displayMup !== null ? r.displayMup : '—') + '%\n';
+  sec5 += '- 월 가동률(MUP): 실제 ' + (r.rawMup !== null ? r.rawMup.toFixed(4) : '—') + '% / 표시 ' + (r.displayMup !== null ? formatMup(r.displayMup) : '—') + '\n';
   sec5 += '- SLO 99.90% 대비: ' + breachStr + '\n';
   sec5 += '- 크레딧 등급: ' + creditStr + '\n\n';
   sec5 += '■ 증빙 자료\n';
