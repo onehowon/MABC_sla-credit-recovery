@@ -130,7 +130,7 @@ body { background: var(--color-surface-raised); margin: 0; padding: var(--space-
       <div class="status-row"><span class="k">장애 기록</span><span class="v"><span class="badge" id="badge-evidence">—</span></span></div>
       <div class="status-row"><span class="k">대상 리소스</span><span class="v"><span class="badge" id="badge-resource">—</span></span></div>
       <div class="status-row"><span class="k">청구 준비</span><span class="v"><span class="badge" id="badge-readiness">—</span></span></div>
-      <p style="font-size:var(--font-size-xs); color:var(--color-text-secondary); margin:var(--space-3) 0 0;">금액과 기한은 Google 공식 절차에서 최종 확인해야 합니다.</p>
+      <p style="font-size:var(--font-size-xs); color:var(--color-text-secondary); margin:var(--space-3) 0 0; line-height:1.55;">이 도구는 <strong>Google 장애 여부 · 최종 승인 · 실제 크레딧 금액을 확정하지 않습니다.</strong><br>입력한 자료를 SLA 규칙으로 계산해 검토 자료를 준비할 뿐이며, 금액과 기한은 Google 공식 절차에서 최종 확인해야 합니다.</p>
     </div>
   </div>
 
@@ -587,7 +587,7 @@ function renderPage(input, r) {
   
   var evStatus = r.noEligibleWindow ? 'UNDETERMINED' : (input.evidence_status || 'SUFFICIENT');
   var evColorMap = { SUFFICIENT: '#256848', INSUFFICIENT: '#c0392b', UNDETERMINED: '#7a5907' };
-  var evLabelMap = { SUFFICIENT: '충분', INSUFFICIENT: '부족', UNDETERMINED: '확인 필요' };
+  var evLabelMap = { SUFFICIENT: '입력 자료 기준 최소 요건 충족', INSUFFICIENT: '증빙 보완 필요', UNDETERMINED: '증거 상태 확인 불가' };
   var evColor = evColorMap[evStatus] || '#586679';
   var evLabel = evLabelMap[evStatus] || evStatus;
   
