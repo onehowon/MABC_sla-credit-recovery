@@ -1,5 +1,7 @@
 .DS_Store
 assets/
+__pycache__/
+*.pyc
 docs/mentoring-brief.md
 docs/poster-content.md
 docs/poster-pitch.md
